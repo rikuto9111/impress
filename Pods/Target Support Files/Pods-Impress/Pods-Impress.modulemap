@@ -1,0 +1,6 @@
+framework module Pods_Impress {
+  umbrella header "Pods-Impress-umbrella.h"
+
+  export *
+  module * { export * }
+}
