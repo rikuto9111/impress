@@ -47,7 +47,7 @@ struct ContentView: View {
     
     @State var sumbookcount:Int = 0
     @State var sumanimecount:Int = 0
-    
+ 
     
     var jisho:[[String:String]] = [["name":"読書初級者","gazou":"dokusho1","page":"1000"],["name":"読書好き","gazou":"dokusho2","page":"5000"],["name":"読書中級者","gazou":"dokusho3","page":"10000"],["name":"趣味読書","gazou":"dokusho4","page":"50000"],["name":"地元の読書王","gazou":"dokusho5","page":"100000"],["name":"読書王","gazou":"dokusho6","page":"200000"],["name":"読書マスター","gazou":"dokusho7","page":"500000"],["name":"読書の神","gazou":"dokusho8","page":"1000000"]]
     
@@ -59,8 +59,7 @@ struct ContentView: View {
         NavigationStack {  //遷移の範囲を決める
             
             ZStack {
-                Color.red.opacity(0.1)
-                    .ignoresSafeArea()
+                
                 
                 VStack {
                     //NavigationLink(destination:ContentView(),isActive: $ismainNavigation){
@@ -108,6 +107,7 @@ struct ContentView: View {
                     }
                     
                     ZStack {//ZStackがいまだにわからん
+                        
                         VStack{
                             Spacer()
                                 .frame(height: 20)
@@ -122,7 +122,8 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(
-                                    Color.green
+                                    //Color.green
+                                    Color(red:0.7,green: 0.7,blue: 0.7)
                                 )
                                 .cornerRadius(20)
                                 .shadow(radius: 4)
@@ -148,14 +149,18 @@ struct ContentView: View {
                             
                             
                             
-                            Spacer()
-                                .frame(height:20)
+                            //Spacer()
+                               // .frame(height:20)
                             
                             ScrollView{
                                 Text("読書メータ")
                                     .bold()
+                                    .font(.title3)
                                 
                                 VStack{
+                                    Spacer()
+                                        .frame(height:20)
+                                    
                                     HStack{
                                         Spacer()
                                             .frame(width:10)
@@ -164,6 +169,7 @@ struct ContentView: View {
                                                 Image(image)
                                                     .resizable()
                                                     .frame(width:100,height:30)
+                                                    .shadow(radius:2)
                                             }
                                         }
                                         VStack{
@@ -195,38 +201,72 @@ struct ContentView: View {
                                         
                                         
                                     }
-                                    .frame(width:300,height: 150)
+                                    .frame(width:340,height: 130)
                                     .background(Color(red:0.4,green:0.8,blue:0.3,opacity: 0.2))
                                     .cornerRadius(15)
+                                    //.shadow(radius:1)
+                                   
+                                    Spacer()
+                                        .frame(height:20)
+                                    
+                                    HStack{
+                                        Spacer()
+                                        Button(action: {
+                                            // 読書登録画面へ遷移する処理
+                                            isreadNavigation = true
+                                        }) {
+                                            Label("読書登録へ　＞", systemImage: "book.fill") // ← ここで📚アイコン
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                                .padding()
+                                                .frame(width:210)
+                                                .background(Color.green.opacity(0.9))
+                                                .cornerRadius(10)
+                                        }
+                                        
+                                        Spacer()
+                                            .frame(width:30)
+                                    }
+                                    
+                                    Spacer()
                                 }
-                                .frame(width:320,height:200)
+                                
+                                .frame(width:360,height:240)
                                 .background(Color(red:0.75,green:1.0,blue:0.3,opacity: 0.5))
                                 .cornerRadius(15)
                                 
                                 
                                 
                                 Spacer()
-                                    .frame(height:30)
+                                    .frame(height:10)
                                 
                                 Text("アニメメータ")
                                     .bold()
+                                    .font(.title3)
                                 
                                 VStack{
+                                    Spacer()
+                                        .frame(height:20)
                                     HStack{
                                         Spacer()
                                             .frame(width:10)
                                         VStack{
                                             if let image = animejisho[animekey]["gazou"]{
                                                 Image(image)
-                                                    .resizable()
-                                                    .frame(width:90,height:30)
+                                                   .resizable()
+                                                    .frame(width:100,height:30)
+                                               // selectImage = image
+                                                    .shadow(radius:5)
+                                                    
                                             }
+                                            
                                         }
                                         
                                         VStack{
                                             if let name = animejisho[animekey]["name"]{
                                                 Text("\(name)への道")
                                             }
+                                                
                                             
                                             ZStack{
                                                 
@@ -240,6 +280,9 @@ struct ContentView: View {
                                                     Text("\(sumanimecount)/\(number)")
                                                 }
                                             }
+                                           // .onAppear(){
+                                               
+                                           // }
                                             
                                             Button("獲得"){
                                                 if let number = animejisho[animekey]["page"],let animenumber = Float(number),let gazou = animejisho[animekey]["gazou"]{
@@ -255,12 +298,38 @@ struct ContentView: View {
                                             
                                             
                                         }
+                                        
                                     }
-                                    .frame(width:300,height: 150)
+                                    .frame(width:340,height: 130)
                                     .background(Color(red:0.7,green:0.8,blue:0.9,opacity: 0.9))
+                                   // .background(selectImage ?? Color.green)//backgroundにxcassetにあってもString型を入れることはできないここでエラーになっている
                                     .cornerRadius(15)
+                                    .shadow(radius:2)
+                                    
+                                    Spacer()
+                                        .frame(height:20)
+                                    
+                                    HStack{
+                                        Spacer()
+                                        Button(action: {
+                                            // 読書登録画面へ遷移する処理
+                                            isanimeNavigation = true
+                                        }) {
+                                            Label("アニメ登録へ　＞", systemImage: "film.fill") // ← ここで📚アイコン
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                                .padding()
+                                                .frame(width:210)
+                                                .background(Color.blue.opacity(0.8))
+                                                .cornerRadius(10)
+                                        }
+                                        Spacer()
+                                            .frame(width:30)
+                                    }
+                                    
+                                    Spacer()
                                 }
-                                .frame(width:320,height:200)
+                                .frame(width:360,height:240)
                                 
                                 .background(Color(red:0.5,green:0.8,blue:0.9,opacity: 0.5))
                                 .cornerRadius(15)
@@ -346,13 +415,15 @@ struct ContentView: View {
 
                             }
                             
-                            
-                            bookdatacount.forEach{ bookcount in
+                            sumbookcount = 0
+                            sumanimecount = 0
+                            bookdatacount.forEach{ bookcount in //onAppearは画面が表示されるたびに実行される　つまり戻ってきた時もこれが起動される　ただState はここに向かう時しか初期化されていない気がする
+                                
                                 sumbookcount += bookcount.pagesumCount
                             }
                             
                             animenumbercount.forEach{ count in //forEachはデータ処理用　ForEachは描画処理用
-                                
+                                 
                                     sumanimecount += count.sumTime
                                
                             }

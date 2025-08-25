@@ -56,18 +56,19 @@ struct BookItem : Identifiable{//IdentifiableにすることでListやforeachで
     @MainActor//クラス変数を変更するとその値に応じてuiの状態が変わるからuiviewと密接に結びつくんだよ　だからmainスレッドで行わなくてはならない
     private func search(keyword: String,count: Int,bool: Bool) async{//非同期が処理するメソッド
         //この段階ではメインスレッドが動かす
-        guard let keyword_encode = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)//キーワードのエンコード
+        guard let keyword_encode = "\"\(keyword)\"".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)//キーワードのエンコード ここで""を入れる
         else{
-            return
+            return//"q"とqで検索結果が異なり"q"の方が厳密
         }
         
         var Nowurl:URL?
         
         if count == 0 && bool == false{//初期検索かそうでないかの場合わけ またこれは書籍検索
-            guard let req_url = URL(string:"https://www.googleapis.com/books/v1/volumes?q=\(keyword_encode)&max=10&order=relevance")
+            guard let req_url = URL(string:"https://www.googleapis.com/books/v1/volumes?q=\(keyword_encode)&max=10&order=relevance")//この中に直接q = "\(keyword)"みたいにはできないってことこれだとq = "3621987634286" みたいになるけど実際にはq = %22 2402987403 %22みたいにしなければならないってこと つまり""をエンコード
             else{//relevanceはデフォルトの検索結果順　maxは個数オプション
                 return
             }
+            print(req_url)
             
             Nowurl = req_url
             
@@ -123,13 +124,19 @@ struct BookItem : Identifiable{//IdentifiableにすることでListやforeachで
                 bookitems.removeAll()//検索メソッドを起動したらかけたら前の結果は初期化
                 
                 //更新　箱に詰め合わせる間はバックグランドは寝るしかないしuiview更新中と同義だから他ごとはできない
-                for item in items{
+                for item in items{//完璧にアンラップされないと本が登録されないからだから10件もないことがあった
                     if let volumeinfo = item.volumeInfo{
-                        if let title = volumeinfo.title,
-                           let authors = volumeinfo.authors,
-                           let pageCount = volumeinfo.pageCount,
-                           let overview = volumeinfo.description,
-                           let infoLink = volumeinfo.infoLink{
+                        //if let title = volumeinfo.title ?? "タイトル不明",
+                           //let authors = volumeinfo.authors ?? ["著者不明"],
+                           //let pageCount = volumeinfo.pageCount ?? 0,
+                           //let overview = volumeinfo.description ?? "",
+                        let title = volumeinfo.title ?? "タイトル不明" //??を使えば入っていない時の処理ができる
+                        //アンラップするならif let a = b elseの時の対応で変数に値を入れるとかしたら同じことができる optionalなデータを入れようとしているのに ""だとオプショナルじゃない
+                            let authors = volumeinfo.authors ?? ["著者不明"]
+                         let pageCount = volumeinfo.pageCount ?? 0
+                        let overview = volumeinfo.description ?? ""
+                        
+                           if let infoLink = volumeinfo.infoLink{//たくさんあるものの中から10件拾ってきてそこから選別するんじゃなくて全体で選別してから10件取ると確実に取れる気はする
                             if let imageLinks = volumeinfo.imageLinks{
                                 if let smallThumbnail1 = imageLinks.smallThumbnail{
                                     let imageUrlString = smallThumbnail1.absoluteString//Stringに変換
@@ -148,7 +155,7 @@ struct BookItem : Identifiable{//IdentifiableにすることでListやforeachで
                     }
                 }
                 
-                //print(bookitems)
+                print(bookitems)
             }catch{
                 print("エラー")
             }

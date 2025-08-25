@@ -10,7 +10,7 @@ import RealmSwift
 import SwiftUI
 
 struct AnimeImpress: View {
-    @ObservedResults(AnimeData.self) var animedatas  //bookデータベース
+    @ObservedResults(AnimeData.self) var animedatas  //animeデータベース
     @ObservedResults(AnimeNumberCount.self) var animedatacounts
     @State var dictionary: [String: Int] = [:]  //hashmap的なやつ Dictionary型//ジャンルごとの本数を見たい
     @State var count = 0  //ジャンル円グラフを作るため
@@ -30,7 +30,19 @@ struct AnimeImpress: View {
     
     @State var isgraphActive = false
     @State var nowmonth = 3  //現在の月
-
+    @State var nowyear = 0//現在の年
+    
+    @State var selectAnimeyear2 = 1
+    @State var selectAnimeyear = 1
+     
+    @State var selectcount = 0
+    
+    
+    @State var isTap = false
+    @State var selectedElement:Int? = nil
+    @State var selectMonth = 0
+    
+    
     @State var selectcondition = "検索条件"
 
     
@@ -40,7 +52,7 @@ struct AnimeImpress: View {
     @State private var isPressed3 = false
     @State private var isPressed4 = false
     
-    @State private var selectMonth:Int = 0
+
     @State private var selectpage :Int = 0
     
     @State var bool = false  //0を作品検索 1を作者検索　にする
@@ -198,7 +210,7 @@ struct AnimeImpress: View {
                                     Text("\(nowmonth)月のアニメ視聴量")
                                     
                                     List {
-                                        if let counting = animedatacounts.filter("month == %@", nowmonth).first {
+                                        if let counting = animedatacounts.filter("month == %@ AND year == %@", nowmonth,selectAnimeyear2).first {
                                             //print("a")
                                             Text("\(counting.sumTime)分")
                                             Text("\(counting.number)本")
@@ -243,17 +255,30 @@ struct AnimeImpress: View {
                                     ZStack {
                                         Color.white
                                         VStack {
-                                            Text("月毎のアニメ試聴時間")
+                                            Spacer()
+                                                .frame(height:15)
+                                            HStack{
+                                                Text("月毎のアニメ試聴時間")
+                                                
+                                                Picker("",selection: $selectAnimeyear2){
+                                                    
+                                                    Text("2025").tag(2025)
+                                                    Text("2026").tag(2026)
+                                                    Text("2027").tag(2027)
+                                                    Text("2028").tag(2028)
+                                                    
+                                                }
+                                            }
                                             Chart {
                                                             ForEach(1...12, id: \.self) { month in
-                                                                let count = animedatacounts.first { $0.month == month }?.sumTime ?? 0 //ない月は0にする
-                                                                BarMark(
+                                                                let count = animedatacounts.first { $0.month == month && $0.year == selectAnimeyear2}?.sumTime ?? 0 //ない月は0にする
+                                                                LineMark(
                                                                     x: .value("月", month),
                                                                     y: .value("視聴時間", count)
                                                                 )//これだけで基本設定は終了
-                                                                
+                                                                .symbol(Circle())
                                                             
-                                                                .foregroundStyle(selectMonth == month ? .red : .blue)
+                                                                .foregroundStyle(.blue)
                                                             }
                                                         }
                                             
@@ -282,10 +307,50 @@ struct AnimeImpress: View {
                                                 .chartXAxisLabel("月")  // X軸のラベルを追加
                                                 .chartYAxisLabel("視聴時間(m)")  // Y軸のラベルを追加
                                                 //.chartYScale(domain: 0...10)  // Y軸の範囲を設定
+                                            
+                                            
+                                            
+                                                .chartOverlay { proxy in GeometryReader { geometry in Rectangle().fill(Color.clear).contentShape(Rectangle())
+                                                             .gesture( DragGesture(minimumDistance: 0) .onChanged { value in
+                                                                 let location = value.location
+                                                                 if let monthDouble:Double = proxy.value(atX: location.x){ let month = Int(round(monthDouble))-1 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
+                                                                     if let data = animedatacounts.first(where: { $0.month == month && $0.year == nowyear}) { selectedElement = data.sumTime // ページ数だけ保持
+                                                                         selectMonth = month
+                                                                         isTap = true
+                                                                     }
+                                                                         else{ selectedElement = 0 // ページ数だけ保持
+                                                                             selectMonth = month
+                                                                             isTap = true
+                                                                         }
+                                                                     }
+                                                                 
+                                                             }
+                                                             )
+                                                     }
+                                                     }
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:80)
+                                                
+                                                if let selected = selectedElement{
+                                                    if isTap,1<=selectMonth,selectMonth<=12{
+                                                        Text("\(selectMonth)月　:\(selected)ページ")
+                                                            .padding()
+                                                            .background(.white)
+                                                            .cornerRadius(10)
+                                                            .shadow(radius: 1)
+                                                            //.position(tooltipPosition) // タップ位置に表示
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    
+                                                }
+                                            }
+                                            
                                         }//V
-                                        .frame(width: 280)
+                                        .frame(width: 340,height:320)
                                     }//Z
-                                    .frame(width: 350, height: 400)
+                                    .frame(width: 370, height: 440)
                                     .cornerRadius(20)
                                     
                                     .onAppear {
@@ -296,9 +361,18 @@ struct AnimeImpress: View {
                                         let month = calendar.component(
                                             .month, from: currentDate)  //月を取り出してくれるツール
                                         
-                                        nowmonth = month
+                                        let year = calendar.component(
+                                            .year, from: currentDate)  //月を取り出してくれるツール
                                         
-                                        for anime in animedatas {  //全部カウント
+                                        nowmonth = month
+                                        nowyear = year
+                                        
+                          
+                                        selectAnimeyear2 = year
+                                        selectAnimeyear = year
+                                        
+                                        //dictionary all
+                                       /*for anime in animedatas {  //全部カウント
                                             count = count + 1  //何本あるかをカウントできる
                                             
                                             if let currentCount = dictionary[
@@ -311,8 +385,8 @@ struct AnimeImpress: View {
                                             }  //varはviewに変更があった場合再描画されるんだけどその度に値がリセットされてしまう　stateつけた変数は変わったらview全体を更新する力を持ってる
                                             //viewに直接影響を与えるものに関してはStateが良い 今回はcountもdictionaryもviewにゴリゴリ与えるからStateが良い
                                             //正直難しい
-                                        }  //ジャンル数をカウント
-                                        print(dictionary)
+                                        }  //ジャンル数をカウント*/
+                                        //print(dictionary)
                                     }
                                     
                                     Spacer()
@@ -324,9 +398,72 @@ struct AnimeImpress: View {
                                         Color.white
                                         
                                         VStack {
-                                            Text("視聴したアニメのジャンル")
+                                            
+                                            HStack{
+                                                
+                                                Spacer()
+                                                    .frame(width:40)
+                                                
+                                                Text("視聴したアニメのジャンル")
+                                                
+                                                Spacer()
+                                                    .frame(width:15)
+                                                
+                                                Picker("",selection: $selectAnimeyear){
+                                                    
+                                                    Text("2025").tag(2025)
+                                                    Text("2026").tag(2026)
+                                                    Text("2027").tag(2027)
+                                                    Text("2028").tag(2028)
+                                                    
+                                                }
+                                                .onChange(of: selectAnimeyear){//onchangeに入るたびにdictionaryを初期化しないとダメ　じゃないと残っちゃう
+                                                    print("ghaphfaihfeowaihfaweihfpoahwiofihapw")
+                                                    dictionary = [:]
+                                                    let animeselectdatas = animedatas.filter{ $0.year == selectAnimeyear }
+                                                    print(animeselectdatas)
+                                                    for anime in animeselectdatas{  //全部カウント        Chartの中でごちゃごちゃ描くのはダメなのかな？
+                                                        selectcount = selectcount + 1  //何本あるかをカウントできる
+                                                        print(selectcount)
+                                                        if let currentCount = dictionary[
+                                                            anime.genre]
+                                                        {  //ジャンルのデータがあるとき+1 多分optional型じゃないくせにoptionalみたいな処理してるのがだめなのかな「
+                                                            dictionary[anime.genre] =
+                                                            currentCount + 1
+                                                            print(currentCount)
+                                                        } else {
+                                                            dictionary[anime.genre] = 1
+                                                            print("0")
+                                                        }  //varはviewに変更があった場合再描画されるんだけどその度に値がリセットされてしまう　stateつけた変数は変わったらview全体を更新する力を持ってる
+                                                        //viewに直接影響を与えるものに関してはStateが良い 今回はcountもdictionaryもviewにゴリゴリ与えるからStateが良い
+                                                        //正直難しい
+                                                    }
+                                                }
+                                                
+                                                Spacer()
+                                                   
+                                            }
                                             
                                             Chart {  //つまり最低限だとidさえ設定しておけばあとはkey,value　これがあれば同じように使える それをいうならdictionaryがidentifiableに準拠していないとリストも同様
+                                                
+                                               // let animeselectdatas = animedatas.first{ $0.year == selectAnimeyear } filterで複数取れる
+                                                //let animeselectdatas = animedatas.filter{ $0.year == selectAnimeyear }
+                                                
+                                                /*for anime in animeselectdatas{  //全部カウント        Chartの中でごちゃごちゃ描くのはダメなのかな？
+                                                    selectcount = selectcount + 1  //何本あるかをカウントできる
+                                                    
+                                                    if let currentCount = dictionary[
+                                                        anime.genre]
+                                                    {  //ジャンルのデータがあるとき+1 多分optional型じゃないくせにoptionalみたいな処理してるのがだめなのかな「
+                                                        dictionary[anime.genre] =
+                                                        currentCount + 1
+                                                    } else {
+                                                        dictionary[anime.genre] = 1
+                                                    }  //varはviewに変更があった場合再描画されるんだけどその度に値がリセットされてしまう　stateつけた変数は変わったらview全体を更新する力を持ってる
+                                                    //viewに直接影響を与えるものに関してはStateが良い 今回はcountもdictionaryもviewにゴリゴリ与えるからStateが良い
+                                                    //正直難しい
+                                                }*/
+                                                
                                                 ForEach(
                                                     dictionary.sorted(by: {
                                                         $0.key < $1.key
@@ -335,7 +472,7 @@ struct AnimeImpress: View {
                                                     SectorMark(  //keyはジャンル名　valueは数  棒だとbarmark
                                                         angle: .value(
                                                             "Count",
-                                                            value * 100 / count),  //これを円グラフを構成するcountとして使うよっていう意味のvalue
+                                                            value * 100 / selectcount),  //これを円グラフを構成するcountとして使うよっていう意味のvalue
                                                         //innerRadius: .ratio(0.5),//小さい縁の半径
                                                         angularInset: 1.5
                                                     )
@@ -347,7 +484,7 @@ struct AnimeImpress: View {
                                                     ) {  //それぞれのグラフのパーツに適応させる注釈
                                                         let persent =
                                                         Double(value)
-                                                        / Double(count)
+                                                        / Double(selectcount)
                                                         * 100
                                                         
                                                         Text(
@@ -358,11 +495,11 @@ struct AnimeImpress: View {
                                                     }
                                                 }
                                             }
-                                            .frame(width: 300, height: 350)
+                                            .frame(width: 320, height: 350)
                                         }
-                                        .frame(width: 300, height: 380)
+                                        .frame(width: 350, height: 380)
                                     }
-                                    .frame(width: 350, height: 420)
+                                    .frame(width: 370, height: 440)
                                     .cornerRadius(20)
                                 }
                                 

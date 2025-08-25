@@ -17,5 +17,6 @@ class BookData:Object,Identifiable{ //Realmに保存したい型はObjectプロ�
     @Persisted var genre    : String = ""
     @Persisted var evaluate : Float  = 0.0
     @Persisted var month:Int = 0
+    @Persisted var year:Int = 0
 }
 

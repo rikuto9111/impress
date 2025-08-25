@@ -91,17 +91,21 @@ struct AnimeRegister: View {
                                         let imageurl = selectanime.image
                                         let imageUrlString = imageurl.absoluteString//Stringに変換
                                         //print(imageUrlString)
-                                        addAnime(Image:"https://image.tmdb.org/t/p/w500\(imageUrlString)", title :selectanime.title, finDate:date, Impression:Editimpress,overview:selectanime.overview,genre: selectgenre,firstdate:selectanime.During,evaluate: selectassess)
+                                        let calendar = Calendar.current//ユーザの地域情報を加味した計算ツール
+                                        
+                                        let month = calendar.component(.month, from: date)//月を取り出してくれるツール
+                                        
+                                        let year  = calendar.component(.year, from: date)
+                                        
+                                        addAnime(Image:"https://image.tmdb.org/t/p/w500\(imageUrlString)", title :selectanime.title, finDate:date, Impression:Editimpress,overview:selectanime.overview,genre: selectgenre,firstdate:selectanime.During,evaluate: selectassess,year:year)
                                         //データベースに本の情報を追加する
                                         
                                         
                                         //登録ボタンを押した時にその読んだ日付月をもとにその月のデータベースにカウンティングする　現在の日付ではないってこと
                                         
-                                        let calendar = Calendar.current//ユーザの地域情報を加味した計算ツール
                                         
-                                        let month = calendar.component(.month, from: date)//月を取り出してくれるツール
                                         
-                                        updateAnime(Time: 30*Readanimedata2.epn,month: month)
+                                        updateAnime(Time: 30*Readanimedata2.epn,month: month,year: year)
                                         
                                         isAccess = true
                                     }
@@ -371,7 +375,7 @@ struct AnimeRegister: View {
             
         }
     }
-    func addAnime(Image :String, title : String, finDate:Date ,Impression:String,overview:String,genre:String,firstdate:String,evaluate:String) {
+    func addAnime(Image :String, title : String, finDate:Date ,Impression:String,overview:String,genre:String,firstdate:String,evaluate:String,year : Int) {
         do {
             let realm = try Realm()//これっていちおう見てるもの違うんだね
             let anime = AnimeData()
@@ -384,7 +388,7 @@ struct AnimeRegister: View {
             anime.firstdate = firstdate
             anime.evaluate = Float(evaluate)!
             anime.episode = Readanimedata2.epn
-            
+            anime.year = year
             try realm.write {//データベースに入れる
                 realm.add(anime)
             }
@@ -394,14 +398,14 @@ struct AnimeRegister: View {
         }
     }
     
-    func updateAnime(Time:Int,month : Int) {//何でもかんでも同じ枠に全部追加するようになっている
+    func updateAnime(Time:Int,month : Int,year : Int) {//何でもかんでも同じ枠に全部追加するようになっている
         
         
         do {
             let realm = try Realm()//これっていちおう見てるもの違うんだね
 
             try realm.write {//指定された月のデータベースに本を入れてやる
-                if let AnimeCount = realm.objects(AnimeNumberCount.self).filter("month == %@", month).first{//存在する場合とそうでない場合 現在の月 オブジェクトは月ごとに一つずつ
+                if let AnimeCount = realm.objects(AnimeNumberCount.self).filter("month == %@ AND year == %@", month,year).first{//存在する場合とそうでない場合 現在の月 オブジェクトは月ごとに一つずつ
                     
                     AnimeCount.number += 1
                     AnimeCount.sumTime += Time
@@ -416,7 +420,7 @@ struct AnimeRegister: View {
                     newAnimeCount.sumTime += Time
                     newAnimeCount.number += 1
                     newAnimeCount.month = month
-                    
+                    newAnimeCount.year = year
                     realm.add(newAnimeCount)
                 }
                 

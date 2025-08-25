@@ -13,6 +13,7 @@ class AnimeNumberCount:Object,Identifiable{
     @Persisted var number = 0//アニメ本数
     
     @Persisted var month = 0
+    @Persisted var year = 0
     
     @Persisted var sumTime:Int = 0//総視聴時間
     

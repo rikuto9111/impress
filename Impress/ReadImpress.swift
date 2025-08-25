@@ -9,6 +9,8 @@ struct ReadImpress: View {
     @State var dictionary: [String: Int] = [:]  //hashmap的なやつ Dictionary型
     @State var count = 0  //ジャンル円グラフを作るため
 
+    @State var bookcount = 0
+    
     @State var ismainNavigation = false  //4つのフラグで4画面をメインから制御
     @State var isreadNavigation = false
     @State var ismovieNavigation = false
@@ -22,7 +24,11 @@ struct ReadImpress: View {
     @State var islistActive = false
     @State var isgraphActive = false
     @State var nowmonth = 3  //現在の月
-
+@State var nowyear = 0 // 現在の年
+    @State var selectyear = 1//
+    @State var selectyear2 = 1
+    @State var selectyear3 = 1//円グラフ用
+    
     @State var selectcondition = "検索条件"
     @State private var selectedElement: Int? = nil
     @State private var tooltipPosition: CGPoint = .zero
@@ -191,7 +197,7 @@ struct ReadImpress: View {
                                     Text("\(nowmonth)月の読書量")
                                     
                                     List {
-                                        if let counting = bookdatacount.filter("month == %@", nowmonth).first {//その月に追加した本がある時
+                                        if let counting = bookdatacount.filter("month == %@ AND year == %@" , nowmonth,nowyear).first {//その月に追加した本がある時
                                             //print("a")
                                             Text("\(counting.pagesumCount)ページ")
                             
@@ -250,17 +256,41 @@ struct ReadImpress: View {
                                     ZStack {
                                         Color.white
                                         VStack {
-                                            Text("月毎の読んだ冊数")
+                                            
+                                  
+                                            
+                                            HStack{
+                                                
+                                                Spacer()
+                                                    .frame(width:45)
+                                                
+                                                Text("月毎の読んだ冊数")
+                                                
+                                                Spacer()
+                                                    .frame(width:15)
+                                                
+                                                Picker("",selection: $selectyear2){
+                                                    Text("2025").tag(2025)
+                                                    Text("2026").tag(2026)
+                                                    Text("2027").tag(2027)
+                                                    Text("2028").tag(2028)
+                                                    
+                                                }
+                                                
+                                 
+                                                Spacer()
+                                            }
+                                            
                                             Chart {
                                                             ForEach(1...12, id: \.self) { month in
-                                                                let count = bookdatacount.first { $0.month == month }?.number ?? 0
+                                                                let count = bookdatacount.first { $0.month == month && $0.year == selectyear2}?.number ?? 0
                                                                 BarMark(
                                                                     x: .value("月", month),
                                                                     y: .value("冊数", count)
                                                                 )
                                                                 
                                                             
-                                                                .foregroundStyle(selectMonth == month ? .red : .blue)
+                                                                .foregroundStyle(.blue)
                                                             }
                                                         }
                                             
@@ -288,6 +318,27 @@ struct ReadImpress: View {
                                         
                                                 .chartXAxisLabel("月")  // X軸のラベルを追加
                                                 .chartYAxisLabel("冊数")  // Y軸のラベルを追加
+                                            
+                                            
+                                                /*.chartOverlay { proxy in GeometryReader { geometry in Rectangle().fill(Color.clear).contentShape(Rectangle())
+                                                             .gesture( DragGesture(minimumDistance: 0) .onChanged { value in
+                                                                 let location = value.location
+                                                                 if let monthDouble:Double = proxy.value(atX: location.x){ let month = Int(round(monthDouble))-2 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
+                                                                     if let data = bookdatacount.first(where: { $0.month == month }) { selectedElement = data.pagesumCount // ページ数だけ保持
+                                                                         selectMonth = month
+                                                                         isTap = true
+                                                                     }
+                                                                         else{ selectedElement = 0 // ページ数だけ保持
+                                                                             selectMonth = month
+                                                                             isTap = true
+                                                                         }
+                                                                     }
+                                                                 
+                                                             }
+                                                             )
+                                                     }
+                                                     }*/
+                                            
                                                 //.chartYScale(domain: 0...10)  // Y軸の範囲を設定
                                         }//V
                                         .frame(width: 280)
@@ -303,9 +354,16 @@ struct ReadImpress: View {
                                         let month = calendar.component(
                                             .month, from: currentDate)  //月を取り出してくれるツール
                                         
-                                        nowmonth = month
+                                        let year = calendar.component(
+                                            .year, from: currentDate)
                                         
-                                        for book in bookdatas {  //全部カウント
+                                        nowmonth = month
+                                        nowyear = year
+                                        
+                                        selectyear = year
+                                        selectyear2 = year
+                                        selectyear3 = year
+                                        /*for book in bookdatas {  //全部カウント
                                             count = count + 1  //何冊あるかをカウントできる
                                             
                                             if let currentCount = dictionary[
@@ -318,7 +376,7 @@ struct ReadImpress: View {
                                             }  //varはviewに変更があった場合再描画されるんだけどその度に値がリセットされてしまう　stateつけた変数は変わったらview全体を更新する力を持ってる
                                             //viewに直接影響を与えるものに関してはStateが良い 今回はcountもdictionaryもviewにゴリゴリ与えるからStateが良い
                                             //正直難しい
-                                        }  //ジャンル数をカウント
+                                        } */ //ジャンル数をカウント
                                         print(dictionary)
                                     }
                                     
@@ -335,13 +393,30 @@ struct ReadImpress: View {
                                         VStack {
                                             Spacer()
                                                 .frame(height:15)
-                                            
-                                            Text("月毎の読んだページ数")
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:85)
+                                                
+                                                Text("月毎の読んだページ数")
+                                                
+                                                Spacer()
+                                                    .frame(width:15)
+                                                
+                                                Picker("",selection: $selectyear){
+                                                    Text("2025").tag(2025)
+                                                    Text("2026").tag(2026)
+                                                    Text("2027").tag(2027)
+                                                    Text("2028").tag(2028)
+                                                    
+                                                }
+                                                Spacer()
+                                                    
+                                            }
                                             
                                             Chart {
                                                 ForEach(1...12, id: \.self) { month in
-                                                    let count = bookdatacount.first { $0.month == month }?.pagesumCount ?? 0
-                                                    LineMark(
+                                                    let count = bookdatacount.first { $0.month == month && $0.year == selectyear}?.pagesumCount ?? 0
+                                                    LineMark(//bookdatacount.first{ book in book.monthのこと 一番最初}
                                                         x: .value("月", month),
                                                         y: .value("冊数", count)
                                                     )
@@ -416,8 +491,8 @@ struct ReadImpress: View {
                                            .chartOverlay { proxy in GeometryReader { geometry in Rectangle().fill(Color.clear).contentShape(Rectangle())
                                                         .gesture( DragGesture(minimumDistance: 0) .onChanged { value in
                                                             let location = value.location
-                                                            if let monthDouble:Double = proxy.value(atX: location.x){ let month = Int(round(monthDouble))-2 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
-                                                                if let data = bookdatacount.first(where: { $0.month == month }) { selectedElement = data.pagesumCount // ページ数だけ保持
+                                                            if let monthDouble:Double = proxy.value(atX: location.x){ let month = Int(round(monthDouble))-1 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
+                                                                if let data = bookdatacount.first(where: { $0.month == month && $0.year == nowyear}) { selectedElement = data.pagesumCount // ページ数だけ保持
                                                                     selectMonth = month
                                                                     isTap = true
                                                                 }
@@ -484,7 +559,7 @@ struct ReadImpress: View {
                                         
                                     }
                                     
-                                    .frame(width: 350, height: 400)
+                                    .frame(width: 370, height: 440)
                                     .cornerRadius(20)
                                     
                                     Spacer()
@@ -495,8 +570,45 @@ struct ReadImpress: View {
                                         Color.white
                                         
                                         VStack {
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:40)
+                                                
                                             Text("読んだ本のジャンル")
                                             
+                                            Picker("",selection: $selectyear3){
+                                                
+                                                Text("2025").tag(2025)
+                                                Text("2026").tag(2026)
+                                                Text("2027").tag(2027)
+                                                Text("2028").tag(2028)
+                                                
+                                            }
+                                            .onChange(of: selectyear3){//onchangeに入るたびにdictionaryを初期化しないとダメ　じゃないと残っちゃう
+                                                print("ghaphfaihfeowaihfaweihfpoahwiofihapw")
+                                                dictionary = [:]
+                                                let bookselectdatas = bookdatas.filter{ $0.year == selectyear3 }
+                                                print(bookselectdatas)
+                                                for book in bookselectdatas{  //全部カウント        Chartの中でごちゃごちゃ描くのはダメなのかな？
+                                                    bookcount = bookcount + 1  //何本あるかをカウントできる
+                                                    print(bookcount)
+                                                    if let currentCount = dictionary[
+                                                        book.genre]
+                                                    {  //ジャンルのデータがあるとき+1 多分optional型じゃないくせにoptionalみたいな処理してるのがだめなのかな「
+                                                        dictionary[book.genre] =
+                                                        currentCount + 1
+                                                        print(currentCount)
+                                                    } else {
+                                                        dictionary[book.genre] = 1
+                                                        print("0")
+                                                    }  //varはviewに変更があった場合再描画されるんだけどその度に値がリセットされてしまう　stateつけた変数は変わったらview全体を更新する力を持ってる
+                                                    //viewに直接影響を与えるものに関してはStateが良い 今回はcountもdictionaryもviewにゴリゴリ与えるからStateが良い
+                                                    //正直難しい
+                                                }
+                                            }
+                                                
+                                                Spacer()
+                                            }
                                             Chart {  //つまり最低限だとidさえ設定しておけばあとはkey,value　これがあれば同じように使える それをいうならdictionaryがidentifiableに準拠していないとリストも同様
                                                 ForEach(
                                                     dictionary.sorted(by: {
@@ -506,7 +618,7 @@ struct ReadImpress: View {
                                                     SectorMark(  //keyはジャンル名　valueは数  棒だとbarmark
                                                         angle: .value(
                                                             "Count",
-                                                            value * 100 / count),  //これを円グラフを構成するcountとして使うよっていう意味のvalue
+                                                            value * 100 / bookcount),  //これを円グラフを構成するcountとして使うよっていう意味のvalue
                                                         //innerRadius: .ratio(0.5),//小さい縁の半径
                                                         angularInset: 1.5
                                                     )
@@ -518,7 +630,7 @@ struct ReadImpress: View {
                                                     ) {  //それぞれのグラフのパーツに適応させる注釈
                                                         let persent =
                                                         Double(value)
-                                                        / Double(count)
+                                                        / Double(bookcount)
                                                         * 100
                                                         
                                                         Text(

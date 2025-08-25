@@ -104,7 +104,7 @@ struct AnimeItem : Identifiable{//IdentifiableにすることでListやforeach�
         }
     
         else if count != 1 {//初期検索かそうでないかの場合わけ またこれは書籍検索
-            guard let req_url3 = URL(string:"https://api.themoviedb.org/3/search/tv?api_key=8e6fc8313337df8adbddf09fd6acce7d&query=\(keyword_encode)&language=ja-JP&page=1")
+            guard let req_url3 = URL(string:"https://api.themoviedb.org/3/search/tv?api_key=8e6fc8313337df8adbddf09fd6acce7d&query=\(keyword_encode)&language=ja-JP&page=\(count)")
             else{//relevanceはデフォルトの検索結果順　maxは個数オプション
                 return
             }

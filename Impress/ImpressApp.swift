@@ -68,13 +68,13 @@ var body: some Scene {
         
         func migrationRealm(){
             let config = Realm.Configuration(
-                schemaVersion: 18, // 新しいスキーマバージョン
+                schemaVersion: 23, // 新しいスキーマバージョン
                 migrationBlock: { migration, oldSchemaVersion in
-                    if oldSchemaVersion < 18
+                    if oldSchemaVersion < 23
                     {
                         migration.enumerateObjects(ofType: BookData.className()) { oldObject,newObject in //グループリスト情報の更新Grouplistclassnamemigrate
                             //newObject!["label"] = List<String>()
-                            newObject!["month"] = 0
+                            newObject!["year"] = 0
 
                         }
                     }

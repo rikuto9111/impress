@@ -87,22 +87,23 @@ struct readRegister: View {
                                 let smallThumbnail1 = selectbook.smallThumbnail
                                 let imageUrlString = smallThumbnail1.absoluteString//Stringに変換
                                 //print(imageUrlString)
-                                addBook(Image:imageUrlString, title :selectbook.title, finDate:date,pageCount:selectbook.pageCount, Impression:Editimpress,overview:selectbook.overview,genre: selectgenre,evaluate: selectassess)
-                                //データベースに本の情報を追加する
+                             
                                 
                                 
                                 //登録ボタンを押した時にその読んだ日付月をもとにその月のデータベースにカウンティングする　現在の日付ではないってこと
                                 
                                 let calendar = Calendar.current//ユーザの地域情報を加味した計算ツール
-                                
+                                let year = calendar.component(.year, from: date)
                                 let month = calendar.component(.month, from: date)//月を取り出してくれるツール
                                 
+                                addBook(Image:imageUrlString, title :selectbook.title, finDate:date,pageCount:selectbook.pageCount, Impression:Editimpress,overview:selectbook.overview,genre: selectgenre,evaluate: selectassess,year:year)
+                                //データベースに本の情報を追加する
                                 
-                                updateBook(pageCount: selectbook.pageCount,month: month){result in
-                                    print(result)
-                                    print("うんち")
-                                    isAccess = true
-                                }
+                                updateBook(pageCount: selectbook.pageCount,month: month,year: year){result in
+                                                                    print(result)
+                                                                    print("うんち")
+                                                                    isAccess = true
+                                                                }
                                 
                    
                             }
@@ -361,7 +362,7 @@ struct readRegister: View {
             
         }
     }
-    func addBook(Image :String, title : String, finDate:Date ,pageCount:Int,Impression:String,overview:String,genre:String,evaluate:String) {
+    func addBook(Image :String, title : String, finDate:Date ,pageCount:Int,Impression:String,overview:String,genre:String,evaluate:String,year:Int) {
         do {
             let realm = try Realm()//これっていちおう見てるもの違うんだね
             let book = BookData()
@@ -374,6 +375,7 @@ struct readRegister: View {
             book.genre = genre
             book.evaluate = Float(evaluate)!
             book.month = nowmonth // 本に追加した月の情報を持たせることで後でdeleteするタイミングでこれを使うと便利
+            book.year = year
             try realm.write {//データベースに入れる
                 realm.add(book)
             }
@@ -383,14 +385,14 @@ struct readRegister: View {
         }
     }
     
-    func updateBook(pageCount:Int,month : Int,completion:@escaping (String) -> Void) {//何でもかんでも同じ枠に全部追加するようになっている
+    func updateBook(pageCount:Int,month : Int,year:Int,completion:@escaping (String) -> Void) {//何でもかんでも同じ枠に全部追加するようになっている
         
         
         do {
             let realm = try Realm()//これっていちおう見てるもの違うんだね
 
             try realm.write {//指定された月のデータベースに本を入れてやる
-                if let bookCount = realm.objects(BookDataCount.self).filter("month == %@", month).first{//存在する場合とそうでない場合
+                if let bookCount = realm.objects(BookDataCount.self).filter("month == %@ AND year == %@", month,year).first{//存在する場合とそうでない場合
                     
                     bookCount.number += 1
                     bookCount.pagesumCount += pageCount
@@ -405,8 +407,10 @@ struct readRegister: View {
                     newbookCount.pagesumCount += pageCount
                     newbookCount.number += 1
                     newbookCount.month = month
+                    newbookCount.year = year
                     
                     realm.add(newbookCount)
+                    print(newbookCount)
                 }
                 
             }

@@ -25,10 +25,11 @@ struct readGraph: View {
                     Chart {
                         ForEach(1...12, id: \.self) { month in  //foreach(bookdatacount)だと該当する月しかグラフに表示しない 1から12まで表示
                             let count =
-                            bookdatacount.first(where: { $0.month == month })?
+                         bookdatacount.first(where: { $0.month == month })?
                                 .number ?? 0
                             //これは1から12まで見てフィルタにかけて$0はbookdatacountの要素 それぞれ照合してぶつかったらそこのcountを入れる
                             //?はnilを許容するっていう意味  ?? nilの場合 0を入れる
+                            
                             BarMark(
                                 x: .value("月", month),
                                 y: .value("冊数", count)

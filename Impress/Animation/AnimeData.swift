@@ -21,5 +21,5 @@ class AnimeData:Object,Identifiable{
     @Persisted var evaluate : Float  = 0.0
     
     @Persisted var episode:Int = 0
-    
+    @Persisted var year : Int = 0
 }
