@@ -60,21 +60,13 @@ struct ReadImpress: View {
 
             }
             .navigationBarBackButtonHidden(true)
-            NavigationLink(
-                destination: EigaImpress(), isActive: $ismovieNavigation
-            ) {
 
-            }
             NavigationLink(
                 destination: AnimeImpress(), isActive: $isanimeNavigation
             ) {
 
             }
-            NavigationLink(
-                destination: DramaImpress(), isActive: $isdoramaNavigation
-            ) {
 
-            }
 
             NavigationLink(
                 destination: ReadImpress(), isActive: $isreadNavigation
@@ -84,8 +76,6 @@ struct ReadImpress: View {
             NavigationLink(destination: Readbooklist(), isActive: $islistActive)
             {}
 
-            NavigationLink(destination: readGraph(), isActive: $isgraphActive) {
-            }  //グラフ確認画面へレッツゴー
 
             
             NavigationLink(destination:Toukou(), isActive: $istoukouActive) {

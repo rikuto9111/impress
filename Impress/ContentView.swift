@@ -72,23 +72,14 @@ struct ContentView: View {
                         
                     }
                     .navigationBarBackButtonHidden(true)
-                    NavigationLink(
-                        destination: EigaImpress(), isActive: $ismovieNavigation
-                    ) {
-                        
-                    }
+                   
                     NavigationLink(
                         destination: AnimeImpress(),
                         isActive: $isanimeNavigation
                     ) {
                         
                     }
-                    NavigationLink(
-                        destination: DramaImpress(),
-                        isActive: $isdoramaNavigation
-                    ) {
-                        
-                    }
+                    
                     NavigationLink(
                         destination: profile(), isActive: $isprofile
                     ) {

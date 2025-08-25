@@ -434,7 +434,7 @@ struct AnimeRegister: View {
     }
 }
 extension View {
-    func dismisskeyboard2() {
+    func dismissKeyboard2() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }//UIApplicationアプリ全体の管理を行うみんなのお父さんsharedはそのインスタンス
 }//FirstResponderは現在フォーカスが当てられている部品のこと　それを否定　resignすることでそらす　sendActionはU
