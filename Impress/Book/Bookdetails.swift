@@ -21,8 +21,8 @@ struct StarRatingView: View{
                 let full = Float(index) < floor(rating)
                 let half = Float(index)+0.5 == rating//最後の半分
                 
-                Image(systemName: full ? "star.fill": (half ? "star.leadinghalf.filled" : "star"))//条件分岐を一行で済ましている
-                    .foregroundColor(.yellow)//Swiftこういうとこあるから嫌
+                Image(systemName: full ? "star.fill": (half ? "star.leadinghalf.filled" : "star"))//fullの数 halfの数文アイコンを表示している
+                    .foregroundColor(.yellow)//条件分岐を一行で済ましている Swiftこういうとこあるから
             }//空白の有無でエラーになる
         }
     }
@@ -118,15 +118,13 @@ struct Bookdetails: View {
                             Text("\(pagenumber)ページ")
                         }
                         
-                        /*.overlay(//いまいちわかっていないけどHStackVstackに枠線を囲いたいときに使う
-                         RoundedRectangle(cornerRadius: 10)
-                         .stroke(Color.green, lineWidth: 2)
-                         )*/
+                  
                         
                         HStack{
                             
                             Spacer()
                                 .frame(width:20)
+                            
                             VStack{
                                 
                                 if let req_url = URL(string: image) {
@@ -189,7 +187,7 @@ struct Bookdetails: View {
                     .frame(width:400)
                     
                     .overlay{
-                        if showDoneMessage{
+                        if showDoneMessage{//投稿することができたらListビューの上から文字を重ねる
                             Text("投稿完了")
                                 .font(.title3)
                                 .foregroundColor(.blue)
@@ -231,13 +229,13 @@ struct Bookdetails: View {
                     Spacer()
                 }
             }
-            if isShowAlert3{
+            if isShowAlert3{//他の本やアニメと合わせて投稿する
                 Color.black.opacity(0.4)
                     .onTapGesture {
                         isShowAlert3 = false // 背景タップでダイアログを閉じる
                     }
                 
-                CustomDialog20(
+                CustomDialog20(//合わせて投稿ビューを表示
                     
                     isShowAlert3: $isShowAlert3,
                     isShowAlert4: $isShowAlert4,
@@ -258,7 +256,7 @@ struct Bookdetails: View {
                         isShowAlert4 = false // 背景タップでダイアログを閉じる
                     }
                 
-                CustomDialog21(
+                CustomDialog21(//合わせて投稿ビューからアイテムが選択された後 -> 共通点とか感想とか入力するビュー
                     
                     isShowAlert4: $isShowAlert4,
                     selectanime: $selectanime,
@@ -267,7 +265,7 @@ struct Bookdetails: View {
                     isEdit2: $isEdit2,
                     onSave: {
                         
-                        mixpost()
+                        mixpost()//実際にfirestoreに投稿
                         isShowAlert4 = false
                     }
                 )//CustomDialog
@@ -426,15 +424,15 @@ struct Bookdetails: View {
     }
     
 }
-struct CustomDialog20: View {//こいつを呼び出すだけでviewを表示するんだね
+struct CustomDialog20: View {//合わせて投稿ビュー
 
     @Binding var isShowAlert3: Bool//Bindingにする必要ないかも　連動させる必要ないから
     @Binding var isShowAlert4: Bool
     
-    @State var animedatas:[AnimeData] = []
-    @Binding var selectanime:AnimeData
+    @State var animedatas:[AnimeData] = []//Realmからanimeobjects全体を格納する
+    @Binding var selectanime:AnimeData//選択したアニメ　外部と連動
     
-    var onSave: () -> Void//なんでこんな関数みたいになってるの?
+    var onSave: () -> Void
     
     var body: some View {//
         
@@ -452,13 +450,14 @@ struct CustomDialog20: View {//こいつを呼び出すだけでviewを表示す
                     .frame(height:10)
                 
                 List{
-                    ForEach(animedatas){ animedata in
+                    ForEach(animedatas){ animedata in//animedatasを元にアニメリストを表示
                         Button(action:
                                 {
-                            selectanime = animedata
+                            selectanime = animedata//ボタンを押したアイテムをselectaitemとする -> 次のビューへ
                             isShowAlert4 = true
                             isShowAlert3 = false
                            }){
+                               
                         HStack{
                             if let req_url = URL(string:animedata.Image){
                                 
@@ -509,7 +508,7 @@ struct CustomDialog20: View {//こいつを呼び出すだけでviewを表示す
 }
 
 
-struct CustomDialog21: View {//こいつを呼び出すだけでviewを表示するんだね
+struct CustomDialog21: View {//共通点　合わせての感想を入力するビュー
 
     @Binding var isShowAlert4: Bool//Bindingにする必要ないかも　連動させる必要ないから
     
@@ -654,3 +653,42 @@ extension View {
 
     
 
+/*
+ 使用されている技術
+ 
+ 1 評価星アイコン
+ 評価値を元に
+ 別で作ったstructビューに渡します
+ 
+ 5まで評価するなら
+ ForEachで<5にして full index < 評価値 on half も同様にしてonにして
+ full なら star.fill half ならstar.half.fill , そうじゃないならstarをImageでビュー形成する
+ 
+ たったそれだけでおっけ
+ 
+ 2 アラートの使い方 簡単なポップアップ選択するか否かとか　はい いいえとか選択させるとかそういったものを簡単に作る仕組み
+ 
+ .alert("投稿してもよろしいですか",isPresented:$isShowAlert){この中にButtonなりつける}
+ 
+ 投稿してもよろしいですかは 注意書きテキスト $isShowAlertはトリガー
+ 
+ 3 今回の投稿の流れ
+ 
+ 投稿するalert -> 合わせて投稿するか -> 合わせて投稿するアイテムを選択viewを表示 -> 選択 -> selectanimeを元に共通点、合わせての感想を書くビューへ
+ -> 投稿する -> firestoreへ投稿
+ 
+ 
+ 4 オンライン投稿
+ 
+   1 firestore開設 -> importできるようにする
+ 
+uidはcreateUserのタイミングで作られる
+ 
+   2 var db = Firestore.firestore()//接続
+ guard let userbase = Auth.auth().currentUser else {//現在のuser情報
+         print("ユーザーがログインしてない")
+         return
+     }
+   ユーザのid(userbase.uid)を元にdb.collection("").document(uid).collection("") ・・> で階層を降りていって,そこに
+ addDocument(data:[]) []の中は["変数名":値,・・・]
+ */

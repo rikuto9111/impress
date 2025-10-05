@@ -137,3 +137,38 @@ struct LoginView: View {
 
 //AppCheckをGoogleでするのはFirebaseはGoogleの手下機能だから　追加とかそういったリクエストが怪しいアクセス
 //かどうかをチェックしてくれる　つまりこいつをonにしないとアプリを認めない
+
+
+//ポイント
+
+/* こいつが本体
+ 1 uidがつくられるのはAuth.auth().createUserを呼び出したタイミングです.つまり初期認証
+    createUserでの認証はpasswordとメールアドレスが必要
+    他の認証方法もありその時も同様にuidが作れる
+ 
+ .sign()メソッドもpassword、メアドで照合する必要があるメソッド
+ 
+ 
+ 2
+   Auth.auth().addStateDidChangeListener{ auth,user in
+     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+     withAnimation{//画面を変更させるスイッチをカチカチじゃなくて連続なふわふわにする
+         if let user = user{//サインインしたことがあればuser情報が入っている authはログイン情報
+             issignedIn = true//user.useridすればそのユーザーのid科が取得できたりする
+         }//一回認証したことがあったらskip
+         else{
+             issignedIn = false
+         }
+     }
+ }
+}
+ 
+ まずaddStateDidChangeListerner{auth,user in} userにnilかそうでないかが入っている
+ 
+ これを呼ぶとuserがAuthを認証したがあるかどうか　あればuser = not nil
+ 
+ DispatchQueue.main メインスレッドは画面管理とかいろんなことやってるけどそのいろんなことの中にこれも非同期で入れてねってことasync Afterつけることで
+ deadlineを決める　deadline秒後にメインスレッドがやるキューに入れる
+ 
+ これを使うことによっていちいちメアドとパスワードを入力するとかいう面倒くさいことをやらなくて済む
+ */

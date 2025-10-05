@@ -159,11 +159,11 @@ struct BookListView: View {
                             
                             Spacer()
                             
-                            Button(action:{
+                            Button(action:{//bookそれぞれのボタンが持つトリガー
                                 onTap.toggle()
-                                updateGoodness(isGood:onTap,othUserId: book.othUserId,documentId: book.documentId,goodness:book.goodness)
+                                updateGoodness(isGood:onTap,othUserId: book.othUserId,documentId: book.documentId,goodness:book.goodness)//各々のbookが持つgoodnessなりidなりを渡す
                             },label:{
-                                Image(systemName: onTap ? "heart.fill" : "heart")
+                                Image(systemName: onTap ? "heart.fill" : "heart")//onTapを見ているやつ全員反応する
                                     .foregroundColor(.pink)
                             })
                             .buttonStyle(PlainButtonStyle())
@@ -185,7 +185,7 @@ struct BookListView: View {
     }
     
 
-    func updateGoodness(isGood:Bool,othUserId:String,documentId:String,goodness:Int){
+    func updateGoodness(isGood:Bool,othUserId:String,documentId:String,goodness:Int){//documentIdでfirestoreのgoodnessフィールドにアクセス newGoodnesssを入れる追加じゃなくて更新
        var db = Firestore.firestore()
        
        let newGoodness = isGood ? goodness + 1 : goodness - 1
@@ -809,16 +809,15 @@ struct Toukou: View{
                 Spacer()
                 
             }//Navigation
-            .onAppear(){
+            .onAppear(){ //本体が表示された瞬間に行う内容
+                
                 guard !hasAppeared else { return }
                 hasAppeared = true
-                getUser()
+                getUser()//structで定義した型に合わせて、animetoukoulists,booktoukoulists,mixtoukoulistsなどにfirestoreにあるアイテムを入れる
                 
-                formatter.dateFormat = "yyyy年MM月dd日"
+                formatter.dateFormat = "yyyy年MM月dd日"//Timestamp型からString型に変換するときの形式を初めに決めておく
                 formatter.locale = Locale(identifier: "ja_JP")
-                
-                print(animetoukoulist)
-                print(mixtoukoulist)
+
             }
         }
         
@@ -1013,10 +1012,10 @@ struct Toukou: View{
                     
                     guard let data = snapshot?.data(),let followers = data["followers"] as? [String] else{
                         print("ない")
-                        return//ここまででfollowersにアクセス followersにあるはず
+                        return//ここまででまずはfollowersにアクセス followersにあるはず
                     }
                     
-                    for follower in followers {
+                    for follower in followers {//フォロワーを一人一人取り出して、そのパスワードと照合してそのdocumentを取り出す
                         print("b")
                         db.collection("user")
                             .whereField("userId", isEqualTo: follower)//id入力したものと照合
@@ -1028,16 +1027,15 @@ struct Toukou: View{
                                 guard let documents = snapshot?.documents,let otheruserDoc = documents.first else{
                                     return
                                 }
-                                print("v")
                                 //ここまでで他人のポインタ取得
                                 let othuserId = otheruserDoc.documentID//それが必要 カギみたいなもの
-                                print(othuserId)
-                                //othUserId.append(othuserId)//この中だけじゃなくてみんなが使うものになる
+
+
                                 
                                 db.collection("user")
                                     .document(othuserId)
                                     .collection("Profile")
-                                    .getDocuments{ profilesnapshot,error in
+                                    .getDocuments{ profilesnapshot,error in //Profileから取り出す
                                         if let error = error{
                                             print("エラー")
                                             return
@@ -1053,14 +1051,12 @@ struct Toukou: View{
                                             return
                                         }
                                         
+       
                                         
                                         
-                                        print(name)
-                                        
-                                        
-                                        db.collection("user")//本物のuserIdからPostを取得
+                                        db.collection("user")//本物のuserIdからbookpostsを取得
                                             .document(othuserId)
-                                            .collection("posts")//post じゃなくてposts
+                                            .collection("posts")
                                             .getDocuments{ postSnapshot, error in
                                                 if let error = error {
                                                     print("投稿の取得エラー: \(error)")
@@ -1096,7 +1092,7 @@ struct Toukou: View{
                                                 
                                                 //getDocument終了 Postを取得する過程
                                                 
-                                                db.collection("user").document(othuserId)
+                                                db.collection("user").document(othuserId)//AnimePostsにアクセス
                                                     .collection("Animeposts")
                                                     .getDocuments{ animesnapshots,error in
                                                         if let error = error{
@@ -1130,7 +1126,7 @@ struct Toukou: View{
                                                         }
                                                     }//animeposts
                                                 
-                                                db.collection("user").document(othuserId)
+                                                db.collection("user").document(othuserId)//MixPostsにアクセス
                                                     .collection("Mixposts")
                                                     .getDocuments{ animesnapshots,error in
                                                         if let error = error{
@@ -1184,4 +1180,9 @@ struct Toukou: View{
         
         
     }
-
+/*
+ 1 firestore内のフィールドの変化は別にSwiftUIとは結びついてないからすぐに反映したいなら手動でね
+ 2 ビューを分離 -> 型推論とかうまくいくようになったりする　-> 重い時
+ 同じStructにやるんじゃなくてパーツに分けてくっつけるイメージ
+ 
+ */

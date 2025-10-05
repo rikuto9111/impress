@@ -40,3 +40,10 @@ class Profilebase :Object,Identifiable{
     }
 }
 
+/*
+ RealmはUIimage型を保存できない -> 表にdata型をvarで出しておいて 外からUIImage型にアクセスしてsetするとクラス定義の中でData型に変換して保存
+ 
+ -> 取り出す時はvar UIImage型に外からアクセスすると自然とかわりにUIImage型に変換されたData型のものがgetできる
+ 
+ get setの仕組みを作っておく!
+ */

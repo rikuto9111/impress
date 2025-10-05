@@ -374,3 +374,18 @@ struct CustomDialog4: View {//こいつを呼び出すだけでviewを表示す�
                 
                 
             }
+
+/*
+ 1  snapshot?.data() = data
+ dataは Any型?
+ 
+ Any型? は不安定な型だからString()とかで変換できなくはないけど
+ 安全に取り出したいなら as? String を使うとStringならStringで返すし、そうじゃないならnilで返す
+ 
+ 2  .updateData([//setDataでは配列の更新はできても追加はできない updateは配列の追加と特定のフィールドの更新が得意
+ "followers": FieldValue.arrayUnion([editId])
+ 
+]
+ FieldValue.arrayUnionは単なる追加じゃなくて重複なしの追加ができる
+ 
+ */

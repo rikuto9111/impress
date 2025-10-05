@@ -108,17 +108,7 @@ struct readRegister: View {
                    
                             }
                         }
-                        /*.font(.largeTitle)  //文字を書いてから
-                         .foregroundStyle(.white)
-                         
-                         .frame(width: 130, height: 50)  //枠を決める
-                         
-                         .padding(10)  //スペースを広げる
-                         .background(
-                         Color(red: 0.0, green: 0.0, blue: 255, opacity: 0.4)
-                         )
-                         
-                         .cornerRadius(50)  //なんかここにおいたらうまく機能した*/
+                        
                         
                         .font(.title)
                         .padding(.horizontal, 25)
@@ -128,10 +118,11 @@ struct readRegister: View {
                         .foregroundColor(.white)
                         .cornerRadius(35)
                         .shadow(radius: 6)
-                        .scaleEffect(ispressed ? 0.9:1.0)
+                        .scaleEffect(ispressed ? 0.9:1.0)//押している間は縮み、離したら戻る
+                        //Buttonのタップとは独立
                         
-                        
-                        
+                        //Buttonとか.gestureは離した時の動作しかわからない
+                        //.simultaneousGestureは押して -> 反応 離して -> 反応　が拾える
                         .simultaneousGesture(//これを管理するにはこいつが必要だしボタンとも競合しない
                             DragGesture(minimumDistance:0)//ドラッグを認識する範囲　もし0ならその部分だけかな？？？？{
                             
@@ -314,8 +305,10 @@ struct readRegister: View {
                                 .frame(height:30)
                             
                             Section(header: Text("感想").font(.headline)) {
+                                
                                 Spacer()
                                     .frame(height: 5)
+                                
                                 ZStack(alignment: .top) {
                                     if Editimpress.isEmpty {  // 入力されていない状態
                                         Text("本の感想")  // プレースホルダー
@@ -338,24 +331,7 @@ struct readRegister: View {
                                 .frame(width:380)
                             }
                             //今までこんなのなくてもスクロールできたくね？
-                            /*ZStack(alignment: .top) {
-                             if Editimpress.isEmpty {  // 入力されていない状態
-                             Text("本の感想")  // プレースホルダー
-                             .foregroundColor(.gray)
-                             //.padding(.horizontal, 8)
-                             .padding(.vertical, 12)
-                             
-                             //.border(Color.gray, width: 1)
-                             .zIndex(1)  // ← プレースホルダーを前面にする！ こいつのお陰様様
-                             }  //読み終わった日とカレンダーの間隔が広いから小さくしたい
-                             TextEditor(text: $Editimpress)
-                             .padding(8)//部品内部の感覚　すなわち文字Text箱と実際の文字の感覚
-                             .frame(width: 350, height: 320)
-                             .background(Color.clear)  // 背景を透明にする
-                             //.border(Color.gray, width: 1)
-                             .cornerRadius(80)
-                             .zIndex(0)  // `TextEditor` を後ろに配置
-                             }*/
+                            
                         }
                     }
                 }
@@ -436,3 +412,48 @@ extension View {
         
     }//UIApplicationアプリ全体の管理を行うみんなのお父さんsharedはそのインスタンス
 }//FirstResponderは現在フォーカスが当てられている部品のこと　それを否定　resignすることでそらす　sendActionはUIkitの持っているメソッド 指定アクションをfromさんからtoさんに送信
+
+
+/*
+ 使用している技術
+ 
+ 1
+ 
+ Button
+ .scaleEffect(ispressed ? 0.9:1.0)
+
+ .simultaneousGesture(//これを管理するにはこいつが必要だしボタンとも競合しない
+     DragGesture(minimumDistance:0)//ドラッグを認識する範囲　もし0ならその部分だけかな？？？？{
+     
+         .onChanged{
+             _ in ispressed = true //ドラッグしている間　押している間
+         }
+         .onEnded{
+             _ in ispressed = false //ドラッグし終わったら　っていう複数の動作
+         }
+     
+ )
+ 
+Buttonを押して離したらactionが実行されるけど押してる間とか離したらとかその時のButtonの外見を変化させる(それだけじゃないけど)
+.scaleEffect(条件せつ)
+.simultaneousGesture{//枠組み
+  
+ }
+ DragGesture(){//実行人
+ 
+ }
+ 2 Section
+ Sectionの中のアイテムをグループ化するために使う
+ 使い方はSection(header:Text()){
+ 
+ }
+ この中にアイテムを入れていく
+ 正直別になくても良い気はする
+ 
+ 3 DatePicker
+ 
+ DatePicker("左に表示するテキスト テーマ的な",selection:$xyz) これが基本 Pickerとの違いは選択するものを自分で記述する必要がないってこと
+ displayedComponents:表示する形式 .dateなら何年何月何日まで
+ 
+ 
+ */

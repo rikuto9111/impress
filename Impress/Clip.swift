@@ -52,3 +52,7 @@ struct CropViewControllerWrapper: UIViewControllerRepresentable {
         }
     }
 }
+
+/*
+ makeUIViewControllerとupdateUIViewControllerはプロトコルに従うために絶対必要
+ */

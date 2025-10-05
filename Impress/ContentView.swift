@@ -14,13 +14,13 @@ struct ContentView: View {
     
     @ObservedResults(Key.self) var keydata
     
-    @ObservedResults(BookDataCount.self) var bookdatacount
-    @ObservedResults(AnimeNumberCount.self) var animenumbercount
-    @State var isreadNavigation = false  //4つのフラグで4画面をメインから制御
-    @State var ismainNavigation = false  //4つのフラグで4画面をメインから制御
-    @State var ismovieNavigation = false
-    @State var isanimeNavigation = false
-    @State var isdoramaNavigation = false
+    @ObservedResults(BookDataCount.self) var bookdatacount//年,月毎の本の合計冊数がRealmにありそれを監視している
+    @ObservedResults(AnimeNumberCount.self) var animenumbercount//年,月毎のアニメの合計試聴時間がRealmにありそれを監視している
+    @State var isreadNavigation = false  //3つのフラグで3画面をメインから制御
+    @State var ismainNavigation = false  //3つのフラグで3画面をメインから制御
+
+    @State var isanimeNavigation = false //3つのフラグで3画面をメインから制御
+
     @State var searchword = ""
     @State var userid = ""
     var bookdatalist = ReadData()  //まずインスタンス生成　このクラスはObserveマクロ
@@ -34,9 +34,9 @@ struct ContentView: View {
     @State var isPressed4 = false
     
     
-    @State var isfollow = false
-    @State var isprofile = false
-    @State var isfollower = false
+    @State var isfollow = false//フォロー画面遷移用の変数
+    @State var isprofile = false//プロフィール画面遷移用の変数
+    @State var isfollower = false//フォロワーリスト画面用の変数
     
     @State var bookkey:Int = 0
     @State var animekey:Int = 0
@@ -72,7 +72,7 @@ struct ContentView: View {
                         
                     }
                     .navigationBarBackButtonHidden(true)
-                   
+                    
                     NavigationLink(
                         destination: AnimeImpress(),
                         isActive: $isanimeNavigation
@@ -97,7 +97,7 @@ struct ContentView: View {
                         
                     }
                     
-                    ZStack {//ZStackがいまだにわからん
+                    ZStack {
                         
                         VStack{
                             Spacer()
@@ -105,8 +105,6 @@ struct ContentView: View {
                             
                             Text("記録メータ")
                                 .font(.largeTitle)
-                            //.frame(width: 500, height: 100)
-                            //.background(Color.green)
                             
                                 .font(.title).bold()  //文字のフォントを太くする
                                 .foregroundColor(.white)
@@ -120,10 +118,7 @@ struct ContentView: View {
                                 .shadow(radius: 4)
                             
                             
-                            
-                            //VStack{//暗転ZStackがこいつの子供になっているせいで範囲が限定されている
-                            
-                            HStack {
+                            HStack {//ハンバーガーアイコン
                                 Spacer()
                                     .frame(width: 270)
                                 
@@ -139,35 +134,36 @@ struct ContentView: View {
                             }
                             
                             
-                            
-                            //Spacer()
-                               // .frame(height:20)
-                            
-                            ScrollView{
+                            ScrollView{//ここからスクロール
+                                
                                 Text("読書メータ")
                                     .bold()
                                     .font(.title3)
                                 
                                 VStack{
+                                    
                                     Spacer()
                                         .frame(height:20)
                                     
                                     HStack{
                                         Spacer()
                                             .frame(width:10)
-                                        VStack{
+                                        
+                                        VStack{//読書称号
                                             if let image = jisho[bookkey]["gazou"]{
                                                 Image(image)
                                                     .resizable()
                                                     .frame(width:100,height:30)
                                                     .shadow(radius:2)
                                             }
-                                        }
+                                        }//
+                                        
                                         VStack{
                                             if let name = jisho[bookkey]["name"]{
                                                 Text("\(name)への道")
                                             }
-                                            ZStack{
+                                            
+                                            ZStack{//読書進捗バー
                                                 if let page = jisho[bookkey]["page"],let pagenumber = Float(page){
                                                     
                                                     ProgressView(value:Float(sumbookcount)/(pagenumber))
@@ -179,11 +175,11 @@ struct ContentView: View {
                                                     Text("\(sumbookcount)/\(page)")
                                                 }
                                                 
-                                            }
+                                            }//
                                             
-                                            Button("獲得"){
+                                            Button("獲得"){//
                                                 if let page = jisho[bookkey]["page"],let pagenumber = Float(page), let gazou = jisho[bookkey]["gazou"]{
-                                                    if Float(sumbookcount)/(pagenumber) >= 1.0{
+                                                    if Float(sumbookcount)/(pagenumber) >= 1.0{//現在のカウントが称号用に設定したページ数を超えたら称号をrealmに保存して次の目標称号を変える
                                                         updatebookKey(key:bookkey,label:gazou)
                                                     }
                                                 }
@@ -196,7 +192,7 @@ struct ContentView: View {
                                     .background(Color(red:0.4,green:0.8,blue:0.3,opacity: 0.2))
                                     .cornerRadius(15)
                                     //.shadow(radius:1)
-                                   
+                                    
                                     Spacer()
                                         .frame(height:20)
                                     
@@ -241,14 +237,15 @@ struct ContentView: View {
                                     HStack{
                                         Spacer()
                                             .frame(width:10)
-                                        VStack{
+                                        
+                                        VStack{//次のアニメ称号
                                             if let image = animejisho[animekey]["gazou"]{
                                                 Image(image)
-                                                   .resizable()
+                                                    .resizable()
                                                     .frame(width:100,height:30)
-                                               // selectImage = image
+                                                // selectImage = image
                                                     .shadow(radius:5)
-                                                    
+                                                
                                             }
                                             
                                         }
@@ -257,11 +254,12 @@ struct ContentView: View {
                                             if let name = animejisho[animekey]["name"]{
                                                 Text("\(name)への道")
                                             }
-                                                
                                             
-                                            ZStack{
+                                            
+                                            ZStack{//アニメ進捗バー
                                                 
-                                                if let number = animejisho[animekey]["page"],let animenumber = Float(number){
+                                                if let number = animejisho[animekey]["page"],let animenumber = Float(number){//まず辞書リストを作り、keyを更新していくことでフォーカスするものを変えていく
+                                                    
                                                     
                                                     ProgressView(value:Float(sumanimecount)/(animenumber))
                                                         .progressViewStyle(LinearProgressViewStyle(tint: .blue))
@@ -270,10 +268,8 @@ struct ContentView: View {
                                                     
                                                     Text("\(sumanimecount)/\(number)")
                                                 }
-                                            }
-                                           // .onAppear(){
-                                               
-                                           // }
+                                            }//
+                                            
                                             
                                             Button("獲得"){
                                                 if let number = animejisho[animekey]["page"],let animenumber = Float(number),let gazou = animejisho[animekey]["gazou"]{
@@ -293,7 +289,7 @@ struct ContentView: View {
                                     }
                                     .frame(width:340,height: 130)
                                     .background(Color(red:0.7,green:0.8,blue:0.9,opacity: 0.9))
-                                   // .background(selectImage ?? Color.green)//backgroundにxcassetにあってもString型を入れることはできないここでエラーになっている
+                                    // .background(selectImage ?? Color.green)//backgroundにxcassetにあってもString型を入れることはできないここでエラーになっている
                                     .cornerRadius(15)
                                     .shadow(radius:2)
                                     
@@ -349,9 +345,11 @@ struct ContentView: View {
                         }
                         
                         VStack{
-                        Spacer()
+                            Spacer()
                                 .frame(height:700)
-                            HStack(spacing: 20) {  //4画面へのボタン
+                            
+                            //3画面へのボタン
+                            HStack(spacing: 20) {
                                 Button("Home") {
                                     ismainNavigation = true
                                 }
@@ -394,8 +392,10 @@ struct ContentView: View {
                                 
                             }
                             
-                        }//H
-                        .onAppear(){
+                        }//H  ここまで遷移ボタン
+                        
+                        
+                        .onAppear(){//ビューの表示されたタイミングで
                             if let key = keydata.first{//ちゃんと会ってそして取り出す
                                 bookkey = key.bookkey
                                 animekey = key.animekey
@@ -403,20 +403,21 @@ struct ContentView: View {
                             
                             else{//realmに初めてアクセスするとき
                                 createKey()
-
+                                
                             }
                             
-                            sumbookcount = 0
-                            sumanimecount = 0
+                            sumbookcount = 0//現在の総合計ページ数のカウント
+                            sumanimecount = 0//現在の総合計アニメ視聴時間のカウント
+                            
                             bookdatacount.forEach{ bookcount in //onAppearは画面が表示されるたびに実行される　つまり戻ってきた時もこれが起動される　ただState はここに向かう時しか初期化されていない気がする
                                 
                                 sumbookcount += bookcount.pagesumCount
                             }
                             
                             animenumbercount.forEach{ count in //forEachはデータ処理用　ForEachは描画処理用
-                                 
-                                    sumanimecount += count.sumTime
-                               
+                                
+                                sumanimecount += count.sumTime
+                                
                             }
                             
                             
@@ -427,7 +428,7 @@ struct ContentView: View {
                         
                         
                         
-                        if isshowmenu {
+                        if isshowmenu {//ハンバーガーアイコンを押したらフォロワー登録、プロフィール、フォロワー一覧の画面を表示する
                             
                             Color.black.opacity(0.4)
                                 .edgesIgnoringSafeArea(.all)
@@ -436,7 +437,7 @@ struct ContentView: View {
                                 }
                             
                             
-                            CustomDialog2(
+                            CustomDialog2(//これが本体
                                 isfollow: $isfollow, isprofile: $isprofile,isfollower: $isfollower,
                                 onSave: {
                                     isshowmenu = false
@@ -455,33 +456,13 @@ struct ContentView: View {
                     
                 }
             }
-                /*if isshowmenu{
-                 HStack{
-                 Spacer()
-                 .frame(width:150)
-                 
-                 //List{//Listはzで違う次元に干渉しやがるから使うのやめよ　押し出される
-                 VStack{
-                 Button("フォロワー登録"){
-                 
-                 }
-                 Divider()
-                 Button("プロフィール"){
-                 
-                 }
-                 }
-                 }
-                 
-                 .zIndex(1)
-                 .frame(width:200,height:130)
-                 .background(.white)
-                 }*/
-            }
-        }  //何でバーだけ変えることをしないのか
-        //それだけ変えていけるけど自分の元の画面に戻ってくる時はボタン付きのものを
+        }
+    }
+        
+                
     
     
-    private func updatebookKey(key:Int,label:String){
+    private func updatebookKey(key:Int,label:String){//本用
         do{
             let realm = try Realm()
             
@@ -510,7 +491,7 @@ struct ContentView: View {
         do{
             let realm = try Realm()
             
-            try realm.write{
+            try realm.write{//インクリメントしたものをKeyデータベースに登録するだけ
                 if let animeKey = realm.objects(Key.self).first{
                     animeKey.animekey = key + 1
                  
@@ -518,7 +499,7 @@ struct ContentView: View {
                 
             }
             
-            try realm.write{
+            try realm.write{//Profilebaseの中に同時に称号のアイコン画像を登録する
                 if let profile = realm.objects(Profilebase.self).first{
                     profile.animelabel.append(objectsIn:[label])
                     print(profile.animelabel)
@@ -534,8 +515,8 @@ struct ContentView: View {
     }
     
     
-    private func createKey(){
-        do{
+    private func createKey(){//realmにkeyが登録されていない時
+        do{//keyは辞書ポインタ用に使う
             let realm = try Realm()
             
             try realm.write{
@@ -588,3 +569,59 @@ struct CustomDialog2: View {
 
     }
 }
+
+//使われている技術
+
+/*
+ 1 遷移
+ NavigationStack{}この中が遷移　NavigationLink(destination:,isActive:)を外につけてNavigationStack内でisActiveに設定されているトリガーがonになったら
+ destinationで飛ぶそれだけ
+ 
+ 2 システムで用意されている画像を撮ってくる
+ Image(systemname:)
+ https://qiita.com/kazy_dev/items/4983faa45630afa75b06 ここにたくさん載ってます
+ 
+ 3  withAnimation{状態変数の変化}  外で状態変数に管理されているビュー
+ こうすると状態変数が変化したらビューが急に変わらずなめらかに変化するようになる withAnimation(){} () のなかで色々設定できる
+ 
+ 4  進捗バー
+ ProgressView(value:) これがデフォルト　valueは0~1
+ .progressViewStyle(LinearProgressViewStyle(tint: .blue)) これは進捗バーのスタイル
+ 
+ 5  Label("",systemImage:) Textとアイコン画像の併用できるみたいな感じかな
+ 
+ 6 .onTapgesture{} 部品につけてタップ検知をする
+ 
+ 7  走査対象変数.forEach{引数 in }これはデータ処理用
+    ForEach(走査対象変数){引数 in}これは繰り返しのビュー構成用
+ 
+ 8 なんからをトリガーにする -> if で判定 -> 中でビューを作るがこの時,もしくはどういう時でも良いかもしれないが
+ 複雑なビューを作る時 ビューを分離する struct  x:View{} で分けて呼び出す時はx(引数で呼び出す)
+ struct xの中と外で連動したい状態変数がある場合 structの中ではその状態変数の変数名はBinding したものにする
+ 
+ 9  Realmの使い方
+ どうやってやんのか忘れたけど使える状態にして
+ 
+ import RealmSwiftして
+ @ObservedResults(Key.self) var keydata 観測者つけて
+ 
+ 観測されているクラス作って
+ import SwiftUI
+ import RealmSwift//カウントデータベース
+
+ class Key:Object,Identifiable{
+     
+     @Persisted(primaryKey: true) var id: ObjectId
+     
+     @Persisted var bookkey:Int = 0
+ }
+
+ let realm = try Realm()
+ 
+ try realm.write{
+     if let bookKey = realm.objects(Key.self).first{
+         bookKey.bookkey = key + 1
+     }
+ } realm開いて書き込む
+ 
+ */

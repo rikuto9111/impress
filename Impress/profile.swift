@@ -130,41 +130,6 @@ struct profile: View {
                             presentationMode.wrappedValue.dismiss()  //ここでトリガーをオンにして戻っても良いけど引数関連があると面倒臭い から一つ戻るだけにする 画面を把握していないとできない管理していないとね
                         }
                         
-                        /*PhotosPicker(selection: $photoPickerSelectedImage, matching:.images,preferredItemEncoding: .automatic,photoLibrary: .shared()){
-                            Text("+")
-                        }//ボタン代わり ボタンプラス押したら写真を取ってくる
-                        
-                        .onChange(of: photoPickerSelectedImage,initial: true){oldValue,newValue in//変化したらnewValueに入る
-                            if let newValue {
-                                /*newValue.loadTransferable(type: Data.self){ result in //取得した写真情報の中で実用的なData型の部分を取り出す
-                                    switch result{
-                                    case .success(let data):
-                                        if let data{
-                                                captureImage = UIImage(data: data)
-                                                showCropper = true
-                                        }
-                                    case .failure:
-                                        return
-                                    }
-                                }*/
-                                Task {
-                                            // 画像のデータをロード
-                                            do {
-                                                if let data = try? await newValue.loadTransferable(type: Data.self),
-                                                   let uiImage = UIImage(data: data) {
-                                                    captureImage = uiImage
-                                                    // 画像が正常に読み込まれたら、cropperを表示
-                                                    DispatchQueue.main.async {
-                                                                showCropper = true
-                                                            }
-                                                }
-                                            } catch {
-                                                // エラー処理
-                                                print("画像の読み込みに失敗しました: \(error)")
-                                            }
-                                        }
-                            }
-                        }*/
 
                         
                         Spacer()
@@ -179,6 +144,10 @@ struct profile: View {
 
                 
                 ZStack{
+                    
+                    //ここからrealmなりから部品を拾ってきて画面に表示するだけゾーン
+                    
+                    //とりあえず称号表示
                     VStack(alignment:.center){
                         HStack{
                             Spacer()
@@ -211,14 +180,15 @@ struct profile: View {
                                             .cornerRadius(20)
                                     }
                                 }
-              
-                                 
+                                
+                                
                             }
                             
                             Spacer()
                                 .frame(width:20)
                             
                             
+                            //自分のイメージアイコンを表示
                             ZStack{
                                 if let captureImageIcon{
                                     Image(uiImage: captureImageIcon)
@@ -227,7 +197,7 @@ struct profile: View {
                                         .cornerRadius(50)
                                 }
                                 else{
-                                    if let pr = profiling.first{
+                                    if let pr = profiling.first{//Realmの自分のプロフィールの箱(Profilingは複数用だが一つしか入ってない)
                                         if let cap = pr.imageicon{//dbに入ってたらそれを使う
                                             
                                             Image(uiImage: cap)
@@ -256,6 +226,7 @@ struct profile: View {
                             Spacer()
                                 .frame(width:60)
                             
+                            //編集ボタン　押したらトリガーがオンになる
                             Button("編集"){
                                 isedit = true
                             }
@@ -270,7 +241,7 @@ struct profile: View {
                         Spacer()
                             .frame(height:10)
                         
-                        
+                        //名前なりなんなり
                         if let pr = profiling.first{//letだとOptionalではなくなる letに入ったらつまりから出ないならそのまま入れれる
                             Text("名前: \(pr.username)")
                         }
@@ -297,6 +268,7 @@ struct profile: View {
                             .frame(height:30)
                         
                         
+                        //3つ本、アニメ、本アニメボタンを用意したからそれぞれ押したらトリガーをオンにしてビューを表示する
                         HStack{
                             
                             Spacer()
@@ -333,7 +305,8 @@ struct profile: View {
                         Divider()
                             .background(.gray)
                         
-                        if isToukoubook{
+                        
+                        if isToukoubook{//本用のビュー
                             List{
                                 ForEach(toukoulist){ mybook in
                                     
@@ -346,7 +319,7 @@ struct profile: View {
                                                 AsyncImage(url: URL(string:mybook.Imageiconurl)){ image in
                                                     image
                                                         .resizable()
-                                                        //.scaledToFit()
+                                                    //.scaledToFit()
                                                         .frame(width:50,height: 50)
                                                         .cornerRadius(30)
                                                     
@@ -418,11 +391,11 @@ struct profile: View {
                                 .onDelete(perform:deleteBook)
                                 
                             }
+                            
+                            
+                        }
                         
-                        
-                }
-                        
-                        if isToukouanime{
+                        if isToukouanime{//アニメ用のビュー
                             List{
                                 ForEach(animetoukoulists){ myanime in
                                     
@@ -435,7 +408,7 @@ struct profile: View {
                                                 AsyncImage(url: URL(string:myanime.imageiconurl)){ image in
                                                     image
                                                         .resizable()
-                                                        //.scaledToFit()
+                                                    //.scaledToFit()
                                                         .frame(width:50,height: 50)
                                                         .cornerRadius(30)
                                                     
@@ -509,146 +482,146 @@ struct profile: View {
                             }
                         }
                         
-                        if isToukouall{
+                        if isToukouall{//本アニメ用のビュ-
                             List{
-                            ForEach(mixtoukoulists){ mymixitem in
-                                
-                                NavigationLink(destination:MyComment3(mixitem:mymixitem)){
-                                    VStack{
-                                        Spacer()
-                                            .frame(width:10)
-                                        
-                                        HStack{
-                                            AsyncImage(url: URL(string:mymixitem.imageiconurl)){ image in
-                                                image
-                                                    .resizable()
+                                ForEach(mixtoukoulists){ mymixitem in
+                                    
+                                    NavigationLink(destination:MyComment3(mixitem:mymixitem)){
+                                        VStack{
+                                            Spacer()
+                                                .frame(width:10)
+                                            
+                                            HStack{
+                                                AsyncImage(url: URL(string:mymixitem.imageiconurl)){ image in
+                                                    image
+                                                        .resizable()
                                                     //.scaledToFit() 画像が崩れないように比率を維持したままになる つまり正方形にはならない　フレームには大きい方を合わせる
-                                                    .frame(width:50,height: 50)
-                                                    .cornerRadius(30)
-                                                
-                                            }placeholder: {
-                                                ProgressView()
-                                            }
-                                            
-                                            Spacer()
-                                                .frame(width:15)
-                                            
-                                            Text("\(mymixitem.name)")
-                                                .bold()
-                                            
-                                            Text(formatter.string(from: mymixitem.createAt.dateValue()))
-                                                .font(.system(size:16))
-                                            
-                                            Spacer()
-                                        }//HStack
-                                        
-                                        //Divider()
-                                        
-                                        Spacer()
-                                            .frame(height:25)
-                                        
-                                        HStack{
-                                            Spacer()
-                                                .frame(width:2)
-                                            VStack{
-                                                AsyncImage(url: URL(string:mymixitem.bookimage)){ image in
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .frame(width:80,height: 80)
-                                                    
+                                                        .frame(width:50,height: 50)
+                                                        .cornerRadius(30)
                                                     
                                                 }placeholder: {
                                                     ProgressView()
                                                 }
-                                                StarRatingView(rating:mymixitem.bookrating)//他のswiftファイルの構造体も参照可
-                                            }//VStack
-                                            VStack{
-                                                Text(mymixitem.booktitle)
                                                 
                                                 Spacer()
-                                                    .frame(height:20)
-                                                HStack{
-                                                    Text("ジャンル")
-                                                        .foregroundColor(.gray)
-                                                    Text(mymixitem.bookgenre)
-                                                }
-                                            }
-                                            Spacer()
-                                        }//HStack
-                                        
-                                        HStack{
-                                            Spacer()
-                                                .frame(width:2)
-                                            VStack{
-                                                AsyncImage(url: URL(string:mymixitem.animeimage)){ image in
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .frame(width:80,height: 80)
-                                                    
-                                                    
-                                                }placeholder: {
-                                                    ProgressView()
-                                                }
-                                                StarRatingView(rating:mymixitem.animerating)//他のswiftファイルの構造体も参照可
-                                            }//VStack
-                                            VStack{
-                                                Text(mymixitem.animetitle)
+                                                    .frame(width:15)
+                                                
+                                                Text("\(mymixitem.name)")
+                                                    .bold()
+                                                
+                                                Text(formatter.string(from: mymixitem.createAt.dateValue()))
+                                                    .font(.system(size:16))
                                                 
                                                 Spacer()
-                                                    .frame(height:20)
-                                                HStack{
-                                                    Text("ジャンル")
-                                                        .foregroundColor(.gray)
-                                                    Text(mymixitem.animegenre)
-                                                }
-                                            }
-                                            Spacer()
-                                        }//HStack
-                                        
-                                        Divider()
+                                            }//HStack
                                             
-                                               Spacer()
-                                                   .frame(height:20)
-                                               
-                                               HStack{
-                                                   Spacer()
-                                                       .frame(width:10)
-                                                   Text("テーマ")
-                                                       .foregroundColor(.gray)
-                                                   Spacer()
-                                                       .frame(width:60)
-                                                   Text(mymixitem.mixthema)
-                                               
-                                                   
-                                                   Spacer()
-                                               }
-                           Spacer()
-                                                   .frame(height:20)
-                                               HStack{
-                                                   Spacer()
-                                                       .frame(width:10)
-                                                   Text("感想")
-                                                       .foregroundColor(.gray)
-                                                   Spacer()
-                                                       .frame(width:40)
-                                                   
-                                                   Text(mymixitem.overview)
-                                                       .lineLimit(nil) // 行数制限なし
-                                                       .fixedSize(horizontal: false, vertical: true) // 縦
-                                                   
-                                                   Spacer()
-                                               }
-                                        
-                                        Spacer()
-                                    }//VStack
-                                }//NavigationLink
+                                            //Divider()
+                                            
+                                            Spacer()
+                                                .frame(height:25)
+                                            
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:2)
+                                                VStack{
+                                                    AsyncImage(url: URL(string:mymixitem.bookimage)){ image in
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .frame(width:80,height: 80)
+                                                        
+                                                        
+                                                    }placeholder: {
+                                                        ProgressView()
+                                                    }
+                                                    StarRatingView(rating:mymixitem.bookrating)//他のswiftファイルの構造体も参照可
+                                                }//VStack
+                                                VStack{
+                                                    Text(mymixitem.booktitle)
+                                                    
+                                                    Spacer()
+                                                        .frame(height:20)
+                                                    HStack{
+                                                        Text("ジャンル")
+                                                            .foregroundColor(.gray)
+                                                        Text(mymixitem.bookgenre)
+                                                    }
+                                                }
+                                                Spacer()
+                                            }//HStack
+                                            
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:2)
+                                                VStack{
+                                                    AsyncImage(url: URL(string:mymixitem.animeimage)){ image in
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .frame(width:80,height: 80)
+                                                        
+                                                        
+                                                    }placeholder: {
+                                                        ProgressView()
+                                                    }
+                                                    StarRatingView(rating:mymixitem.animerating)//他のswiftファイルの構造体も参照可
+                                                }//VStack
+                                                VStack{
+                                                    Text(mymixitem.animetitle)
+                                                    
+                                                    Spacer()
+                                                        .frame(height:20)
+                                                    HStack{
+                                                        Text("ジャンル")
+                                                            .foregroundColor(.gray)
+                                                        Text(mymixitem.animegenre)
+                                                    }
+                                                }
+                                                Spacer()
+                                            }//HStack
+                                            
+                                            Divider()
+                                            
+                                            Spacer()
+                                                .frame(height:20)
+                                            
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:10)
+                                                Text("テーマ")
+                                                    .foregroundColor(.gray)
+                                                Spacer()
+                                                    .frame(width:60)
+                                                Text(mymixitem.mixthema)
+                                                
+                                                
+                                                Spacer()
+                                            }
+                                            Spacer()
+                                                .frame(height:20)
+                                            HStack{
+                                                Spacer()
+                                                    .frame(width:10)
+                                                Text("感想")
+                                                    .foregroundColor(.gray)
+                                                Spacer()
+                                                    .frame(width:40)
+                                                
+                                                Text(mymixitem.overview)
+                                                    .lineLimit(nil) // 行数制限なし
+                                                    .fixedSize(horizontal: false, vertical: true) // 縦
+                                                
+                                                Spacer()
+                                            }
+                                            
+                                            Spacer()
+                                        }//VStack
+                                    }//NavigationLink
+                                    
+                                }//Foreach
                                 
-                            }//Foreach
-                            
-                        
-                        }
+                                
+                            }
                         }
                         
                         Spacer()//Spacer()おかないと真ん中に寄せられる
@@ -661,32 +634,32 @@ struct profile: View {
                                 userid = userd
                             }  //クロージャーつき非同期処理が終わった後の処理
                         }
-                        if let user = Auth.auth().currentUser{
-                            if let originalday = user.metadata.creationDate{
+                        if let user = Auth.auth().currentUser{//自分のアプリの登録日を取得するためにAuthにアクセスして
+                            if let originalday = user.metadata.creationDate{//currentUserのcreationDateにアクセスしている(Date型)
                                 print("ok")
                                 //userday = originalday
                                 let calendar = Calendar.current//ユーザの地域情報を加味した計算ツール
                                 
-                                let year = calendar.component(.year, from: originalday)//月を取り出してくれるツール
+                                let year = calendar.component(.year, from: originalday)//年を取り出してくれるツール
                                 let month = calendar.component(.month, from: originalday)//月を取り出してくれるツール
-                                let day = calendar.component(.day, from: originalday)//月を取り出してくれるツール
+                                let day = calendar.component(.day, from: originalday)//日を取り出してくれるツール
                                 
                                 useryear = year
                                 usermonth = month
                                 userday = day
                                 
-                                /* if let pro = profiling.first{
-                                 profile = pro//静的変数にローカルを入れる profiling,firstの記述をprofileにしただけじゃん
-                                 }*/ //ここのprofileを使うのであればビューが再描画されて初めて更新されるようになるからっていう弱点が丸見え
+                                
                                 
                             }
                         }
                         
-                        formatter.dateFormat = "yyyy年MM月dd日"
+                        formatter.dateFormat = "yyyy年MM月dd日" //timestamp -> string整形ツール
                         formatter.locale =  Locale(identifier: "ja_JP")
                         
-                        getToukouitem()
                         
+                        getToukouitem() //投稿した本あにめなどを全部取得
+                        
+                        //多分profile.labelには達成した称号の名前とかじゃなくて番号が追加されいくわけであり、keyには現在持っている最新の称号の番号が保存されていると思うからそれでlabelを取得する
                         if let profile = profiling.first{
                             if let key = key.first{
                                 label = profile.label[key.bookkey]
@@ -695,103 +668,71 @@ struct profile: View {
                         }
                     }
                     
-                        if isedit{//ZStackの中に入っている状態
-                            Color.black.opacity(0.4)
-                                .ignoresSafeArea(.all)
-                                .onTapGesture {  //それがここ　タップした時の反応　これって部品全部に持ってるのかな
-                                    hideKeyboard5()
+                    if isedit{//ZStackの中に入っている状態
+                        Color.black.opacity(0.4)
+                            .ignoresSafeArea(.all)
+                            .onTapGesture {  //それがここ　タップした時の反応　これって部品全部に持ってるのかな
+                                hideKeyboard5()
+                            }
+                        
+                        CustomDialog3(isedit: $isedit,
+                                      editname: $editname,
+                                      editintro: $editintro,
+                                      selectedImage: $selectedImage,
+                                      captureImageIcon: $captureImageIcon,
+                                      onSave:{
+                            if let selectedImage,let captureImageIcon{//selectImage,captureImageは編集ボタンを押したなら変更されなくてはならない
+                                
+                                addProfile(image: selectedImage, editIntro: editintro, editname: editname,imageicon: captureImageIcon)
+                                uploadImage(selectedImage){ url in//第三者はセットで置いておく
+                                    uploadImageIcon(captureImageIcon){ iconurl in
+                                        saveUserProfile(imageurl: url, editIntro: editintro,editname:editname,imageiconurl:iconurl,label:label,animelabel:animelabel){error in
+                                            if let error = error{
+                                                print("error")
+                                            }
+                                        }
+                                    }
                                 }
-                            
-                            CustomDialog3(isedit: $isedit,
-                                          editname: $editname,
-                                          editintro: $editintro,
-                                          selectedImage: $selectedImage,
-                                          captureImageIcon: $captureImageIcon,
-                                          onSave:{
-                                if let selectedImage,let captureImageIcon{//profile.nameとかにしないことでもしname=""ならば
-                                    //からを保存することになるけどそもそも空入力を許していない
-                                    addProfile(image: selectedImage, editIntro: editintro, editname: editname,imageicon: captureImageIcon)
-                                    uploadImage(selectedImage){ url in//第三者はセットで置いておく
-                                        uploadImageIcon(captureImageIcon){ iconurl in
-                                            saveUserProfile(imageurl: url, editIntro: editintro,editname:editname,imageiconurl:iconurl,label:label,animelabel:animelabel){error in
+                                
+                            }//オフライン用
+                            else{//これがないとビューを構成して感想名前だけ更新したいっていう時にできなくなる 一応背景画像は表示されているのに
+                                if let pro = profiling.first,let image = pro.image,let icon = pro.imageicon{//
+                                    addProfile(image: image, editIntro: editintro, editname: editname,imageicon: icon)
+                                    uploadImage(image){url in
+                                        uploadImageIcon(icon){iconurl in
+                                            saveUserProfile(imageurl: url, editIntro: pro.Introduce,editname:pro.username,imageiconurl:iconurl,label:label ,animelabel:animelabel){error in
                                                 if let error = error{
                                                     print("error")
                                                 }
                                             }
                                         }
                                     }
-                                    
-                                }//オフライン用
-                                else{//これがないとビューを構成して感想名前だけ更新したいっていう時にできなくなる 一応背景画像は表示されているのに
-                                    if let pro = profiling.first,let image = pro.image,let icon = pro.imageicon{//
-                                        addProfile(image: image, editIntro: editintro, editname: editname,imageicon: icon)
-                                        uploadImage(image){url in
-                                            uploadImageIcon(icon){iconurl in
-                                                saveUserProfile(imageurl: url, editIntro: pro.Introduce,editname:pro.username,imageiconurl:iconurl,label:label ,animelabel:animelabel){error in
-                                                    if let error = error{
-                                                        print("error")
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    else{
-                                        print("aaa")
-                                    }
                                 }
                                 
-
-                                //オンライン用
-                                
-                                
-                                
-                                
-                                    isedit = false
-                                
+                                else{
+                                    print("aaa")
+                                }
+                            }
                             
-                            })
-                            .frame(width:400,height:600)
-                        }
-
-
+                            
+                            //オンライン用
+                            
+                            
+                            
+                            
+                            isedit = false
+                            
+                            
+                        })
+                        .frame(width:400,height:600)
+                    }
+                    
+                }
 
                     }
                
                 .navigationBarBackButtonHidden(true)//Navigationに入っているviewだったらどこでも良い
-                //.toolbar{
-                   // ToolbarItem(placement: .topBarLeading) {
-                        
-                        
-                    //}
-                //}
-                }
-            /*.sheet(isPresented: $showCropper) {
-                if let img = captureImage {
-                    CropViewControllerWrapper(image: img, croppedImage: $selectedImage, isPresented: $showCropper)
-                        }
-                else{
-                    Text("うんち")
-                }
-                    }*/
-          /*  .sheet(
-                isPresented: Binding(
-                    get: { captureImage != nil },
-                    set: { newValue in
-                        if !newValue {
-                            captureImage = nil
-                        }
-                    }
-                )
-            ) {
-                if let img = captureImage {
-                    CropViewControllerWrapper(image: img, croppedImage: $selectedImage, isPresented: $showCropper,onDismiss: {
-                        captureImage = nil // ← これが呼ばれて閉じるようになる
-                    })
-
-                }
-             
-            }*/
+                
 
             }
 
@@ -841,6 +782,8 @@ struct profile: View {
             print("ユーザーがログインしてない")
             return//いったんはカレントユーザid
         }
+        
+        //ここからはただアクセスしてstruct構造体の型を元に追加するだけ
         let userid = userbase.uid  //uid取得
                             db.collection("user")
                                 .document(userid)
@@ -995,12 +938,17 @@ struct profile: View {
         return nil
     }
     
+    //背景画像
+    
+    //firestoreはUIImage型とかData型は直接保存できない
+    //Storageを経由するけどStorageもData型しか保存できない
+    
     func uploadImage(_ image: UIImage,completion: @escaping (String) -> Void) {//completionをつけることでこいつが終わった後の処理をかける
         
         let storageRef = Storage.storage().reference()//storageを起動している 参照権get　ルートディレクトリ
         let imageRef = storageRef.child("profile_images/\(UUID().uuidString).jpg")//適当なstring.jpg被らないように その中のprofile_imagesの下にあるjpg参照
         
-        if let imageData = image.jpegData(compressionQuality: 0.8) {//Data型への変換
+        if let imageData = image.jpegData(compressionQuality: 0.8) {//Data型への変換 圧縮率
             
             imageRef.putData(imageData, metadata: nil) { metadata, error in//参照の中のputData
                 if let error = error {
@@ -1025,6 +973,8 @@ struct profile: View {
         }
     }
             
+    //ImageIcon用
+    
     func uploadImageIcon(_ imageicon: UIImage,completion: @escaping (String) -> Void) {
         
         let storageRef = Storage.storage().reference()//storageを起動している 参照権get　ルートディレクトリ
@@ -1101,7 +1051,7 @@ struct profile: View {
         }
         
     }
-    
+    //オフライン用プロフィール保存
     private func addProfile(image:UIImage,editIntro:String,editname:String,imageicon: UIImage){//オフライン用
         do{
             if let profile = profiling.first?.thaw() {//初回編集じゃない時
@@ -1122,6 +1072,7 @@ struct profile: View {
                 let realm = try Realm()
                 
                 let profile = Profilebase()
+                
                 profile.image = image
                 profile.Introduce = editintro
                 profile.username = editname
@@ -1164,10 +1115,9 @@ struct profile: View {
                 } else {
                     completion(nil)
                 }
-                //print(UID)
+
             }
-            //print(UID)
-            //return UID
+
         }  //ここまで
         
     }
@@ -1201,9 +1151,11 @@ struct CustomDialog3: View {//こいつを呼び出すだけでviewを表示す�
                         .frame(width:70)
 
                     
-                    PhotosPicker(selection: $photoPickerSelectedImage, matching:.images,preferredItemEncoding: .automatic,photoLibrary: .shared()){
+                    PhotosPicker(selection: $photoPickerSelectedImage, matching:.images,preferredItemEncoding: .automatic,photoLibrary: .shared()){//PhotosPicker
+                        //だけでアルバムを呼び出し権限やらなんやらも自動で処理してくれる
                         
-                        
+                        //selection　選択した写真 matching:.image　画像にアクセス .automatic　エンコードは自動で shared 共有ライブラリからの選択
+                        //ユーザに選んでもらうUIを表示する
 
                         if let image = selectedImage{
                             Image(uiImage: image)//保存したら入るよ
@@ -1233,17 +1185,7 @@ struct CustomDialog3: View {//こいつを呼び出すだけでviewを表示す�
                     
                     .onChange(of: photoPickerSelectedImage,initial: true){oldValue,newValue in//変化したらnewValueに入る
                         if let newValue {
-                            /*newValue.loadTransferable(type: Data.self){ result in //取得した写真情報の中で実用的なData型の部分を取り出す
-                             switch result{
-                             case .success(let data):
-                             if let data{
-                             captureImage = UIImage(data: data)
-                             showCropper = true
-                             }
-                             case .failure:
-                             return
-                             }
-                             }*/
+                            
                             Task {
                                 // 画像のデータをロード
                                 do {
@@ -1444,3 +1386,193 @@ extension View {
     }  //UIApplicationアプリ全体の管理を行うみんなのお父さんsharedはそのインスタンス
 }
 
+
+/*
+ かなりたくさんのポイントが詰まったView
+ 
+ 1  Text(formatter.string(from: mybook.createAt.dateValue()))
+ 
+ Textは中身はStringである必要があるため無理やりString化してほしい
+ 
+ dateValueはdate型変換 -> formatter.stringでstringに変換
+ この時DateFormatter()のままだとよくわからない文字列のままだから
+ formatter.dateFormat = "yyyy月MM日dd  みたいにformatを作ってから変換すると良い
+ 
+ 
+ @State var formatter:DateFormatter = DateFormatter()
+ 
+ 2  firestoreのアイテムの消し方
+ 
+ let filteredBook = toukoulist[index]  // 表示中のリストから対象を取得
+ 
+ アイテムを取得したら
+ 
+ db.collection("user").document(filteredBook.othUserId).collection("posts").document(filteredBook.documentId)
+ 
+ アイテムのfirestoreでのdocumentIdを元にdocumentを取得して
+ .delete({error in})するだけ
+ 
+     .delete{error in
+         if let error = error {
+             print("error")
+         }
+     }
+ 
+ 3  if isEditの枠で firestoreのオンライン用とrealmのオフライン用に追加してるけど
+ オンラインだけにするとネットワークがない時には自分のプロフィールが何もなくなるし何も見れないし
+ オフラインがあるおかげでそこまではいつでも見れるようにというちょっとした気遣い
+ 
+ 4 uploadImage ImageIcon
+ 
+ firestoreはData型もUIImage型も保存できない
+ から
+ Storageを使ってData型を保存 -> そこにアクセスできるようにurlを取り出し
+ firestoreでurlを保存
+ 
+ let storageRef = Storage.storage().reference()//storageを起動している 参照権get　ルートディレクトリ
+ ルート参照権
+ 
+ 
+ let imageRef = storageRef.child("profile_images/\(UUID().uuidString).jpg")//適当なstring.jpg被らないように その中のprofile_imagesの下にあるjpg参照
+ profile_imageは手動じゃなくて勝手に作られる
+ 
+ 適当な名前のjpgを作り参照権を取得
+ 
+ if let imageData = image.jpegData(compressionQuality: 0.8) {//Data型への変換 圧縮率
+ UIImage型をjpgのData型変換 この時圧縮率も決めておく
+ 
+ imageRef.putData(imageData, metadata: nil) { metadata, error
+ 
+ ここで参照している場所にぶち込む
+ 
+ imageRef.downloadURL { url, error in/
+ 
+ 参照しているurlを取得
+ 
+ 5 completionが必要な理由
+ 
+ firestoreの通信などはすべて非同期で行われており、completionがないとそのまま関数から出てしまい特に通信した結果を返したい時　もう関数が終わってるから何も返せなくなる
+ 
+ completionはその非同期処理が終わるのを待っていてくれる
+ 
+ private func getUserID(completion: @escaping (String?) -> Void) {  //completionは非同期処理が終わったらに何かを実行するクロージャを渡す
+     
+     var db = Firestore.firestore()
+     
+     var UID: String = ""
+     guard let userbase = Auth.auth().currentUser else {  //現在のuser情報
+         print("ユーザーがログインしてない")
+         return
+     }
+     let userid = userbase.uid  //uid取得
+     
+     db.collection("user").document(userid).getDocument {
+         snapshot, error in  //非同期処理
+         if let error = error {  // それを元にUSErIDの検索をかける
+             print("errror")
+         } else {
+             if let data = snapshot?.data(),
+                let fetchid = data["userId"] as? String
+             {
+                 UID = fetchid  //uidのkeyがないと中まで潜り込めない
+                 print("a")
+                 print(UID)
+                 completion(UID)  //""を爆速で返すことになる 呼び出し元に返す
+             } else {
+                 completion(nil)
+             }
+
+         }
+
+     }  //ここまで
+     
+ }
+}
+ 
+ completion(UID) は渡さないと呼び出し元には結果が返っていかない
+ 
+ 6
+ 
+ PhotosPicker(selection: $photoPickerSelectedImage, matching:.images,preferredItemEncoding: .automatic,photoLibrary: .shared()){//PhotosPicker
+     //だけでアルバムを呼び出し権限やらなんやらも自動で処理してくれる
+     
+     //selection　選択した写真 matching:.image　画像にアクセス .automatic　エンコードは自動で shared 共有ライブラリからの選択
+ 
+ }
+ 
+ editからの流れ
+ 
+ 
+ 1  PhotosPickerでアルバムからの選択photosPickerImage(PhotosPickerItem型)に入る
+ .onChangeで変化を追跡して
+ 
+ Task {
+     // 画像のデータをロード
+     do {
+         if let data = try? await newValue.loadTransferable(type: Data.self),
+            let uiImage = UIImage(data: data) {
+             captureImage = uiImage
+             // 画像が正常に読み込まれたら、cropperを表示
+             DispatchQueue.main.async {
+                 showCropper = true
+             }
+         }
+     } catch {
+         // エラー処理
+         print("画像の読み込みに失敗しました: \(error)")
+     }
+ }
+ 
+ PhotosPickerItem型からData型への変換 loadTrasferableも非同期に回されるから 処理が終わるまでawaitで待って置けるようにする
+ 変換したらdataをUIImageに変換してcaptureImageに保存 - > showcropper起動(なくてもよい) captureimageにセットされるだけで良い気がする
+ ->
+ 
+ 
+ .sheet の基本
+ .sheet(isPresented: Bool, content: () -> View
+ 
+ 今回
+ 
+ isPresented: Binding(
+     get: { captureImage != nil },
+     set: { newValue in
+         if !newValue {
+             captureImage = nil
+         }
+     }
+ )
+) {
+ 
+ Bindingはよくわからない
+ get: 実際のトリガー
+ 
+ set: newValueがnilになったらcaptureImageもnilに連携する  まあ正直あまりよくわかんない　この書き方
+ 
+ もっと簡単な書き方ないの？
+ 
+ 
+ CropViewControllerWrapper　を作って
+ それを構造体として呼び出しているだけで中のアクションを勝手に拾って勝手に内部で処理しているからよくわかんない
+ 
+ delegateとかってなんだっけ？
+ UIKitの通知とswiftUiの橋渡し　通知人
+ 
+ delegateに指定したclass　に本体が任せたい処理をその中に書いておくと
+ その処理はswiftuiに通知されることができる
+ 
+ UIViewControllerRepresentableにしなければならないの？　これにしておくと何ができるの？
+ SwiftUI の世界は 全部 View。
+ でも UIKit には View と ViewController があるから、そのまま持ち込めない。
+ だから：
+ UIKit の UIView を使いたいときは UIViewRepresentable
+ UIKit の UIViewController を使いたいときは UIViewControllerRepresentable
+
+ UIViewControllerRepresentableはプロトコル　プロトコルに従うことでViewController を使うことができるようになる
+ プロトコルは共通言語的な？ 備えるべき機能
+ 
+ 
+ 
+ makeUIViewControllerRepresentableプロトコルがあればinit()的な感じでmakeUIviewControllerが実行されて、ToCropViewControllerっていうのが作られて、シート設定もしているからUIとして出てきて、完了,キャンセル処理に関してはdelegateで指定したものに任せていて、そうすることでdelegateで任されたものはSwiftUiと繋がっているんだよね
+ 
+ ViewControllerのシート表示はControllerが管理している画面が出てくる
+ */

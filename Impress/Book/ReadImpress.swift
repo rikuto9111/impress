@@ -3,19 +3,17 @@ import RealmSwift
 import SwiftUI
 
 struct ReadImpress: View {
-    @ObservedResults(BookData.self) var bookdatas  //bookデータベース
-    @ObservedResults(BookDataCount.self) var bookdatacount
+    @ObservedResults(BookData.self) var bookdatas  //登録した本に対してのdbの観測者
+    @ObservedResults(BookDataCount.self) var bookdatacount//本の合計ページ数の観測者
 
     @State var dictionary: [String: Int] = [:]  //hashmap的なやつ Dictionary型
     @State var count = 0  //ジャンル円グラフを作るため
 
     @State var bookcount = 0
     
-    @State var ismainNavigation = false  //4つのフラグで4画面をメインから制御
+    @State var ismainNavigation = false  //3つのフラグで3画面を制御
     @State var isreadNavigation = false
-    @State var ismovieNavigation = false
     @State var isanimeNavigation = false
-    @State var isdoramaNavigation = false
 
     @State var istoukouActive = false
     
@@ -81,11 +79,12 @@ struct ReadImpress: View {
             NavigationLink(destination:Toukou(), isActive: $istoukouActive) {
             }
             
+            
             ZStack {
-                Image(.readbackground)
+                Image(.readbackground)//背景画像の指定
                     .resizable()
                     .ignoresSafeArea()
-                    .onTapGesture {  //それがここ　タップした時の反応　これって部品全部に持ってるのかな
+                    .onTapGesture {  //それがここ　タップしたらフォーカスが離れる
                         hideKeyboard4()
                     }
 
@@ -124,7 +123,7 @@ struct ReadImpress: View {
                                         red: 0, green: 0, blue: 1.0,
                                         opacity: 0.5))
                         }
-                        Picker(selection: $selectcondition) {  //何で$使うんだっけ？？？？？？
+                        Picker(selection: $selectcondition) {  //検索する際にPickerで選択しなければ検索ワードを入力できないようになっている
                             Text("書籍検索")  //表面上見えてるもの
                                 .tag("書籍")  //tagの値がselectconditionにはセットされている
                             Text("作者検索")
@@ -136,7 +135,8 @@ struct ReadImpress: View {
                         
                         Spacer()
                     }
-                    .onChange(of: selectcondition, initial: true) {
+                    
+                    .onChange(of: selectcondition, initial: true) {//Pickerで選択した値が書籍なのか作者なのかで検索方法を変えている
                         oldValue, newValue in
                         
                         if newValue == "書籍" {
@@ -150,6 +150,7 @@ struct ReadImpress: View {
                         .frame(height: 10)
                     
                     HStack {
+                        
                         TextField("search for book", text: $searchword)
                         //.onSubmit(){bookdatalist.searchBooks(keyword: searchword)}
                             .disabled(selectcondition=="検索条件")//disabledの中身はboolean条件　を満たしている間は使えない
@@ -159,8 +160,8 @@ struct ReadImpress: View {
                             .frame(width: 300)
                         
                         Button("検索") {
-                            bookdatalist.searchBooks(
-                                keyword: searchword, count: counter, bool: bool)
+                            bookdatalist.searchBooks(//bookdatalistはReadDataのクラス変数的なもの
+                                keyword: searchword, count: counter, bool: bool)//searchBooksは検索入力したものをクエリとして検索してbookitemsの中に検索結果が入る
                             
                         }
 
@@ -290,14 +291,10 @@ struct ReadImpress: View {
                                             
                                             .chartXAxis {
                                                 AxisMarks(position:.bottom,values:[1,2,3,4,5,6,7,8,9,10,11,12])//デフォルトでメモリの感覚は1な気がするデフォルトでgridline ticklabel全部デフォ
-                                                        /*_ in
-                                                        AxisGridLine()
-                                                        AxisTick()
-                                                        AxisValueLabel()
-                                                    }*/
-                                                    }  // X軸のラベル　指定していないから勝手に最適化されている
+                                                   
+                                                    }  // X軸のラベル　指定していないと勝手に最適化されている
                                             
-                                            .chartYAxis {
+                                            .chartYAxis {//正直要らなかったかもデフォルト(AxisMarks())でもこいつらは表示される
                                                 AxisMarks(position: .leading) {
                                                     _ in  //この中にメモリ　グリッド　ラベルを追加
                                                     AxisGridLine()
@@ -310,24 +307,7 @@ struct ReadImpress: View {
                                                 .chartYAxisLabel("冊数")  // Y軸のラベルを追加
                                             
                                             
-                                                /*.chartOverlay { proxy in GeometryReader { geometry in Rectangle().fill(Color.clear).contentShape(Rectangle())
-                                                             .gesture( DragGesture(minimumDistance: 0) .onChanged { value in
-                                                                 let location = value.location
-                                                                 if let monthDouble:Double = proxy.value(atX: location.x){ let month = Int(round(monthDouble))-2 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
-                                                                     if let data = bookdatacount.first(where: { $0.month == month }) { selectedElement = data.pagesumCount // ページ数だけ保持
-                                                                         selectMonth = month
-                                                                         isTap = true
-                                                                     }
-                                                                         else{ selectedElement = 0 // ページ数だけ保持
-                                                                             selectMonth = month
-                                                                             isTap = true
-                                                                         }
-                                                                     }
-                                                                 
-                                                             }
-                                                             )
-                                                     }
-                                                     }*/
+                                                
                                             
                                                 //.chartYScale(domain: 0...10)  // Y軸の範囲を設定
                                         }//V
@@ -478,10 +458,13 @@ struct ReadImpress: View {
                                                
                                         
                                             
-                                           .chartOverlay { proxy in GeometryReader { geometry in Rectangle().fill(Color.clear).contentShape(Rectangle())
-                                                        .gesture( DragGesture(minimumDistance: 0) .onChanged { value in
-                                                            let location = value.location
-                                                            if let monthDouble:Double = proxy.value(atX: location.x){ let month = Int(round(monthDouble))-1 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
+                                           .chartOverlay { proxy in GeometryReader { geometry in Rectangle().fill(Color.clear).contentShape(Rectangle())//グラフ描画領域に透明なビューを重ねる
+                                               //GeometryReaderでそれを監視するって感じ この時に形を設定しておく必要がある
+                                                        .gesture( DragGesture(minimumDistance: 0)//ドラッグでもタップでも反応する
+                                                            .onChanged { value in //valueは現在触っている位置　これが変化するたびに呼ばれる
+                                                            let location = value.location//現在位置座標(フレーム座標)
+                                                            if let monthDouble:Double = proxy.value(atX: location.x)//proxy.value()でグラフで設定した座標に変換
+                                                                { let month = Int(round(monthDouble))-1 //よくわからんけど2ヶ月ずれるif let month: Int = proxy.value(atX: location.x){
                                                                 if let data = bookdatacount.first(where: { $0.month == month && $0.year == nowyear}) { selectedElement = data.pagesumCount // ページ数だけ保持
                                                                     selectMonth = month
                                                                     isTap = true
@@ -574,23 +557,25 @@ struct ReadImpress: View {
                                                 Text("2028").tag(2028)
                                                 
                                             }
+                                                //Pickerの値が変わるたびに円グラフで表示するためのdictionaryを変える
+                                                
                                             .onChange(of: selectyear3){//onchangeに入るたびにdictionaryを初期化しないとダメ　じゃないと残っちゃう
-                                                print("ghaphfaihfeowaihfaweihfpoahwiofihapw")
+                                               
                                                 dictionary = [:]
                                                 let bookselectdatas = bookdatas.filter{ $0.year == selectyear3 }
-                                                print(bookselectdatas)
+                                                
                                                 for book in bookselectdatas{  //全部カウント        Chartの中でごちゃごちゃ描くのはダメなのかな？
                                                     bookcount = bookcount + 1  //何本あるかをカウントできる
-                                                    print(bookcount)
+                                                 
                                                     if let currentCount = dictionary[
                                                         book.genre]
                                                     {  //ジャンルのデータがあるとき+1 多分optional型じゃないくせにoptionalみたいな処理してるのがだめなのかな「
                                                         dictionary[book.genre] =
                                                         currentCount + 1
-                                                        print(currentCount)
+                                              
                                                     } else {
                                                         dictionary[book.genre] = 1
-                                                        print("0")
+                                      
                                                     }  //varはviewに変更があった場合再描画されるんだけどその度に値がリセットされてしまう　stateつけた変数は変わったらview全体を更新する力を持ってる
                                                     //viewに直接影響を与えるものに関してはStateが良い 今回はcountもdictionaryもviewにゴリゴリ与えるからStateが良い
                                                     //正直難しい
@@ -641,7 +626,7 @@ struct ReadImpress: View {
                                 
                             }
                             
-                        } else {
+                        } else {//検索状態
                             VStack{
                                 List {
                                     
@@ -655,7 +640,9 @@ struct ReadImpress: View {
                                                 Spacer()
                                                     .frame(width: 30)
                                                 VStack{
-                                                    if isAlreadyRegistered(book: book){//LIstビューも要素が少しでも変わったら再描画される falseになって表示しないってなったら早速戻って全体が更新されるつまり全体がfalseのまま更新されるmのかな //hanteiっていう一つの状態変数を使っているとswiftuiはビューごとに状態変数で監視すべきだし思った以上に再描画しまくっているから仮に初めtrueでもtrueじゃないやつにぶち当たって　つまりそんな共通の変数一つで管理できるほどリストというか器用じゃない
+                                                    if isAlreadyRegistered(book: book){//LIstビューも要素が少しでも変わったら再描画される
+                                                        //realmデータベースに検索したアイテムのタイトルが入っていたら登録済みにしてやる
+                                                        
                                                         HStack{
                                                             Spacer()
                                                                 .frame(width:30)
@@ -681,22 +668,10 @@ struct ReadImpress: View {
                                                         .frame(
                                                             width: 270, height: 100)
                                                 }
-                                                /*.onAppear(){
-                                                    do {
-                                                        let realm = try Realm()
-                                                        if let bookCount = realm.objects(BookData.self).filter("title == %@",book.title).first{  //存在する場合とそうでない場合
-                                                            hantei = true
-                                                        }
-                                                        
-                                                    } catch {
-                                                        print("Error adding task: \(error.localizedDescription)")
-                                                    }
-                                                    
-                                                }*/
+                                                
                                                 Spacer()  //AsyncImageをつけないとメインスレッド更新
                                                 //故に画像を撮ってきている間に画面がフリーズする
-                                                //それが嫌だったら非同期でimage(url)を撮ってきたい
-                                                //それがviewの中だけどAsyncImage
+                                      
                                                     .frame(width: 30)
                                                 
                                                 AsyncImage(
@@ -708,7 +683,6 @@ struct ReadImpress: View {
                                                             width: 80,
                                                             height: 90)
                                                     
-                                                    //画面をスクロールして画面外にimageが出た時にまた戻して画像を表示させるのに再読み込みする必要があるのがうざい
                                                 } placeholder: {
                                                     ProgressView()  //非同期で動かしている間画面のインジゲータ
                                                 }//Async画像
@@ -807,3 +781,98 @@ extension View {
     }  //UIApplicationアプリ全体の管理を行うみんなのお父さんsharedはそのインスタンス
 }  //FirstResponderは現在フォーカスが当てられている部品のこと　それを否定　resignすることでそらす　sendActionはUIkitの持っているメソッド 指定アクションをfromさんからtoさんに送信
  
+
+
+//使われている技術
+
+/*
+ 1 ネット画像の表示
+ ネットとかで撮ってきたり作った画像をAssets.xcassetsの中に入れる -> それをImage(.名前)で指定するだけで表示できます
+ 
+ 2 Pickerの使い方
+ Picker(selection:){Text().tag() Text().tag()} 選択された部品のtagの中身がselectionで指定された変数にセットされる なんで$なのかは忘れた
+ 
+ Pickerがstructの中に外のstructを入れる時みたいに隔離？されているから中と外とで値を連動させるために$してるんじゃない？　Binding的な
+ 
+ 3 自分で入力するのは
+ 
+ TextEditor 長文用
+ TextEditor(text:$z)
+ 
+ 
+ TextField 一文 入力する前の薄文字が簡単に設定できる
+ TextField("xyz" , text:$z) これも隔離されているから連動させるために$をつける
+ .disabled(selectcondition=="検索条件") これを設定することで中の条件がtrueにならない限りはTextFieldを使えなくする
+ .submitLabel(.search)はキーボードの右下のボタンを何にするか変える
+ 
+ 4 NavigationLink{} この中のアイテムは全てボタン扱いになる
+ 
+ 5 realmデータベースの使い方
+ 
+ 1 追加 realm.write addなど
+   含まれているか realm.objects(観測構造体.self).contains(where:{})
+   削除  realm.write{この中でrealm.delete(object)してやる}
+ 
+ 6 URLでネットの画像を非同期に取ってくる
+ AsyncImage(url:) 引数 in{
+ 
+ }
+ placeholder:{ProgressView()}
+ 
+ Imageはxcassetにある画像を取ってくる
+ 
+ 
+ 7 グラフの使用
+1 外で構造体なりrealmなどIdentifiable準拠の配列を用意して
+ 
+2 Charts{
+  ForEach(1.){引数 in
+  なんとかMark( BarMarksは棒グラフ, LineMarksは折れ線グラフ,SectorMarksは円グラフ
+    x: .value("", 変数),
+    y: .value("",変数) (円グラフは別) xとyを指定した変数で各々プロットしていく
+ )
+ 
+ }
+ 
+ }
+ 
+ ここまでが基本
+ 
+ .chartXAxis {AxisMarks(position:,values:[1,2,3,])} positionはラベルの値を表示する位置 valuesはラベルの値 デフォルトでは良くも悪くも自動調整されてしまう
+ .chartYAxis {} でx軸,y軸の軸の値を指定したりする
+ .chartXAxisLabel("月") 軸のラベルを設定
+ 
+ 結構応用
+ /グラフの中でタップした位置のx座標とそこでの値を表示する
+ 
+ .chartoverlay{
+ 
+ }
+ 1 透明なビューを重ねる
+ 2 コントローラーを作る (座標 <-> グラフ)
+ 3 透明なビューの形を決める
+ 4 .gesture{.onChangedでタップなどの変化のたびに起動}
+ 5 座標を取得したりproxyでグラフ座標に対応したりしてそこをkeyとしてvalueを取り出したりする
+ 
+ 8 現在の日付の取得
+ 
+ let currentDate = Date()
+ ここで手に入れた情報を
+ let calendar = Calendar.current  //ユーザの地域情報を加味した計算ツール
+ 
+ こいつ使って
+ let month = calendar.component(
+     .month, from: currentDate)  //月を取り出してくれるツール
+ 
+ 必要なものを取り出す
+ 
+ 
+ 9 アプリ全体でよく使っていたのが、検索とかでフォーカスされた部品の
+ フォーカスを戻すために
+ extention View{
+ func (){
+ UIApplication.shared.sendAction()
+ }
+ }
+ を使っていた　これを実際にビューに.onTapgestureつけて起動させる
+ */

@@ -59,24 +59,6 @@ struct Readbooklist: View {
                         bookdatalists = Array(bookdatas)
                         
                     }
-                   /* Picker(selection: $channel){
-                        ForEach(list,id:\.self){ item in
-                            Text(item).tag(item)
-                        }
-                    }label:{
-                        Text("切り替え")
-                    }
-                    .pickerStyle(.menu)
-                    */
-                    
-                   
-                    
-                    
-                    
-                    
-                  /*  .onChange(of: channel){ newValue in
-                        bookdatalists = selectBook(channel:channel)
-                    }*/
 
                     ZStack{
                         
@@ -218,7 +200,6 @@ struct Readbooklist: View {
             let realm = try Realm()
             let selectbookdata = realm.objects(BookData.self).filter("genre == %@",channel)
             
-            //print(selectbookdata)
             
             return Array(selectbookdata)
             
@@ -245,13 +226,7 @@ struct Readbooklist: View {
     
     
     private func deleteCountbook(pageCount: Int,month:Int) {  //本の場合はページ数も減らしておく
-        /*let currentDate = Date()
-        let calendar = Calendar.current  //ユーザの地域情報を加味した計算ツール
-        
-        let month = calendar.component(
-            .month, from: currentDate)  //月を取り出してくれるツール
-        
-        nowmonth = month*/
+
         
         do {
             let realm = try Realm()
@@ -444,7 +419,7 @@ struct CustomDialog: View {//こいつを呼び出すだけでviewを表示す�
                     
                     ForEach(list,id:\.self){ item in
                         HStack{
-                            Button(action: {
+                            Button(action: {//各々のアイテムによって動作を変えている
                                 if item == "ミステリー"{
                                     ismistery.toggle()
                                     
@@ -475,14 +450,14 @@ struct CustomDialog: View {//こいつを呼び出すだけでviewを表示す�
                                 }
                             })
                             {
-                                        HStack {
+                                        HStack {//ボタン各々の外観
                                             Text(item)
                                             Spacer()
                                             if isSelected(item: item) {
                                                 Image(systemName: "checkmark")
                                                     .foregroundColor(.blue)
                                             }
-                                        }//しっかりボタンはButton()で作るのはやめた方が良い
+                                        }//しっかりしたボタンはButton()で作るのはやめた方が良い
                             }
                         }
                     }
@@ -534,3 +509,69 @@ struct CustomDialog: View {//こいつを呼び出すだけでviewを表示す�
         }
     }
 }
+
+/*
+ 使用されている技術
+ 
+ 1 realmdbからアイテムの削除
+ 
+ swipe deleteはList { ForEach{}.onDelete(perform:(deleteBook))}の組み合わせでやる
+ 
+ deleteBook(at offsets: IndexSet)
+ 受け取る側は at offesets: IndexSet だけ指定したおくと
+ 送る側は何も引数を設定しなくてもスワイプしたインデックスを送ってくれます
+ 
+ *offsetsは複数であることに注意
+ 
+ このインデックスを元にアイテムを取り出し、そのアイテムをrealm.write{realm.delete(それ)}で消す
+ 
+ これが基本中の基本
+ 
+ ただ、アイテムをたとえばbookdatalist = bookdatasの配列　みたいにArray変換とかしてて
+ bookdatalist[index]とかで取得したアイテムならば読み取り専用のFrozenObjectになるらしくて
+ その時はそのまま削除はもちろんできない
+ 
+ だから取り出したアイテムと同じものをrealmからidで取得して(ライブオブジェクト)
+ それを削除する
+ 
+ 2 絞り込んでdbから条件を元に取ってきて表示する
+ 
+ 
+ 1 絞り込みボタンを押す -> 絞り込み用のビューを表示 -> ifでそれぞれのトリガーをon,offする
+ 適応でもどす -> 戻ってきた状態を元に
+ 
+ let selectedGenres: [String] = {
+     var genres = [String]()
+     if ismistery { genres.append("ミステリー") }
+     if isSF { genres.append("SF") }
+     if isfantacy { genres.append("ファンタジー") }
+     if issyakai { genres.append("社会小説") }
+     if iskyouyou { genres.append("教養") }
+     if isbusiness { genres.append("ビジネス") }
+     if isrikou { genres.append("理工系") }
+     if isjidousho { genres.append("児童書") }
+     if issonota   { genres.append("その他") }
+     
+     return genres
+ }()
+ 
+ こんな感じの荒技でlet変数を作る
+ 中でvarを動かしletに入れる onのものをselectedGenresに入れる
+ 
+ その配列を元にrealmで検索をかけてヒットしたアイテムをarrayにする ->  realm.objects(BookData.self).filter("genre IN %@",channel) filterするときに
+ IN 演算子で配列は検索をかける
+ 
+ で共通のarrayを元にまた表示する
+ 
+ 
+ 
+ 
+ ForEachの中でそれぞれのtrigger状態を元にチェックマークを入れるかどうかつまりchangecolorと似たような感じ
+ 
+ 3 ジャンルに応じて色を変える
+ 
+ ForEachの中でbook(取り出したアイテム).genreを引き渡し -> その値を元に色を決めてText(.genre).background(帰ってきた色)
+ 
+ 色を決めるのは条件分岐をいっぱい作ってゴリ押ししている
+ 
+ */
