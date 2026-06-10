@@ -1,5 +1,6 @@
-読書・アニメ記録アプリ
-
+<h2>読書・アニメ記録アプリ「麺録」</h2>
+<img src="demo_anime.gif" width="300" height = "600">
+<img src="demo_dokusho.gif" width="300" height = "600">
 Swift / SwiftUI を用いて、読書とアニメ視聴の体験を記録・比較できるiOSアプリとして開発した。
 
 機能概要
