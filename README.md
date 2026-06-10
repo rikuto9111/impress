@@ -1,14 +1,4 @@
 <h2>読書・アニメ記録アプリ「麺録」</h2>
-<p>
-  <img src="demo_anime.gif" width="240" height="500">
-    &nbsp;&nbsp;&nbsp;
-  &nbsp;&nbsp;&nbsp;
-  <img src="demo_dokusho.gif" width="240" height="500">
-  &nbsp;&nbsp;&nbsp;
-  &nbsp;&nbsp;&nbsp;
-  <img src="demo_sns.gif" width="240" height="500">
-</p>
-
 <table>
 <tr>
   <th>Anime Tracking</th>
