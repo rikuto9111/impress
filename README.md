@@ -1,6 +1,7 @@
 <h2>読書・アニメ記録アプリ「麺録」</h2>
 <p>
   <img src="demo_anime.gif" width="280">
+    &nbsp;&nbsp;&nbsp;
   <img src="demo_dokusho.gif" width="280">
 </p>
 
