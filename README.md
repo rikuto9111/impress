@@ -9,6 +9,19 @@
   <img src="demo_sns.gif" width="240" height="500">
 </p>
 
+<table>
+<tr>
+  <th>Anime Tracking</th>
+  <th>Book Tracking</th>
+  <th>Social Features</th>
+</tr>
+<tr>
+  <td><img src="demo_anime.gif" width="240"></td>
+  <td><img src="demo_dokusho.gif" width="240"></td>
+  <td><img src="demo_sns.gif" width="240"></td>
+</tr>
+</table>
+
 Swift / SwiftUI を用いて、読書とアニメ視聴の体験を記録・比較できるiOSアプリとして開発した。
 
 機能概要
