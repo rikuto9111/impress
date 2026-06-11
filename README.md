@@ -1,4 +1,4 @@
-<h2>読書・アニメ記録アプリ「麺録」</h2>
+<h2>読書・アニメ記録アプリ「Impress」</h2>
 <table>
 <tr>
   <th>Anime Tracking</th>
